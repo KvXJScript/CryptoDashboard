@@ -3,43 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(20, 14.3%, 4.1%);
-  --muted: hsl(60, 4.8%, 95.9%);
-  --muted-foreground: hsl(25, 5.3%, 44.7%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(20, 14.3%, 4.1%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(20, 14.3%, 4.1%);
-  --border: hsl(20, 5.9%, 90%);
-  --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(60, 4.8%, 95.9%);
-  --secondary-foreground: hsl(24, 9.8%, 10%);
-  --accent: hsl(60, 4.8%, 95.9%);
-  --accent-foreground: hsl(24, 9.8%, 10%);
-  --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(20, 14.3%, 4.1%);
-  --radius: 0.5rem;
-  
-  /* Crypto-specific colors */
-  --crypto-dark: hsl(0, 0%, 7.1%);
-  --crypto-card-dark: hsl(0, 0%, 11.8%);
-  --crypto-success: hsl(168, 100%, 41.6%);
-  --crypto-danger: hsl(0, 76.7%, 69.8%);
-  --crypto-primary: hsl(207, 90%, 54%);
-}
-
-.dark {
   --background: hsl(240, 10%, 3.9%);
   --foreground: hsl(0, 0%, 98%);
   --muted: hsl(240, 3.7%, 15.9%);
   --muted-foreground: hsl(240, 5%, 64.9%);
   --popover: hsl(240, 10%, 3.9%);
   --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 10%, 3.9%);
+  --card: hsl(240, 10%, 8%);
   --card-foreground: hsl(0, 0%, 98%);
   --border: hsl(240, 3.7%, 15.9%);
   --input: hsl(240, 3.7%, 15.9%);
@@ -49,17 +19,49 @@
   --secondary-foreground: hsl(0, 0%, 98%);
   --accent: hsl(240, 3.7%, 15.9%);
   --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive: hsl(0, 62.8%, 50%);
   --destructive-foreground: hsl(0, 0%, 98%);
   --ring: hsl(240, 4.9%, 83.9%);
-  --radius: 0.5rem;
+  --radius: 0.75rem;
+  
+  /* Crypto-specific colors */
+  --crypto-dark: hsl(240, 10%, 3.9%);
+  --crypto-card-dark: hsl(240, 8%, 8%);
+  --crypto-success: hsl(142, 76%, 50%);
+  --crypto-danger: hsl(346, 87%, 62%);
+  --crypto-primary: hsl(217, 91%, 60%);
+  --crypto-warning: hsl(38, 92%, 50%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 8%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 50%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.75rem;
   
   /* Crypto-specific colors for dark mode */
-  --crypto-dark: hsl(0, 0%, 7.1%);
-  --crypto-card-dark: hsl(0, 0%, 11.8%);
-  --crypto-success: hsl(168, 100%, 41.6%);
-  --crypto-danger: hsl(0, 76.7%, 69.8%);
-  --crypto-primary: hsl(207, 90%, 54%);
+  --crypto-dark: hsl(240, 10%, 3.9%);
+  --crypto-card-dark: hsl(240, 8%, 8%);
+  --crypto-success: hsl(142, 76%, 50%);
+  --crypto-danger: hsl(346, 87%, 62%);
+  --crypto-primary: hsl(217, 91%, 60%);
+  --crypto-warning: hsl(38, 92%, 50%);
 }
 
 @layer base {
@@ -93,6 +95,10 @@
     color: var(--crypto-primary);
   }
   
+  .crypto-warning {
+    color: var(--crypto-warning);
+  }
+  
   .bg-crypto-success {
     background-color: var(--crypto-success);
   }
@@ -105,6 +111,10 @@
     background-color: var(--crypto-primary);
   }
   
+  .bg-crypto-warning {
+    background-color: var(--crypto-warning);
+  }
+  
   .border-crypto-success {
     border-color: var(--crypto-success);
   }
@@ -115,5 +125,54 @@
   
   .border-crypto-primary {
     border-color: var(--crypto-primary);
+  }
+  
+  .border-crypto-warning {
+    border-color: var(--crypto-warning);
+  }
+  
+  /* Glass morphism effects */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .dark .glass-card {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Gradient animations */
+  .gradient-animation {
+    background: linear-gradient(270deg, var(--crypto-primary), var(--crypto-success), var(--crypto-warning));
+    background-size: 600% 600%;
+    animation: gradientShift 3s ease infinite;
+  }
+  
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* Modern scrollbars */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--muted);
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--crypto-primary);
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--crypto-success);
   }
 }

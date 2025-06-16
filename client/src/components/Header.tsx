@@ -19,15 +19,15 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 dark:bg-crypto-card-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+    <header className="sticky top-0 z-50 glass-card border-b border-border/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-crypto-primary to-crypto-success rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 gradient-animation rounded-lg flex items-center justify-center">
               <ChartLine className="w-4 h-4 text-white" />
             </div>
-            <span className="text-xl font-bold">CryptoTracker</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">CryptoTracker</span>
           </div>
 
           {/* Desktop Navigation */}
@@ -35,10 +35,10 @@ export default function Header() {
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
                 <a
-                  className={`transition-colors ${
+                  className={`transition-colors font-medium ${
                     item.active
-                      ? "text-gray-900 dark:text-white"
-                      : "text-gray-500 hover:text-crypto-primary"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-crypto-primary"
                   }`}
                 >
                   {item.label}
@@ -54,12 +54,12 @@ export default function Header() {
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="rounded-lg hover:bg-muted transition-all duration-300"
             >
               {theme === "dark" ? (
-                <Sun className="h-4 w-4" />
+                <Sun className="h-4 w-4 text-crypto-warning" />
               ) : (
-                <Moon className="h-4 w-4" />
+                <Moon className="h-4 w-4 text-crypto-primary" />
               )}
             </Button>
 
