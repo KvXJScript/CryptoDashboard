@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
@@ -98,7 +99,12 @@ export default function Trade() {
   const topLosers = cryptos?.filter(c => c.change24h < 0).sort((a, b) => a.change24h - b.change24h).slice(0, 3) || [];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <motion.div 
+      className="min-h-screen bg-background text-foreground"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -297,6 +303,6 @@ export default function Trade() {
         crypto={selectedCrypto}
         tradeType={tradeType}
       />
-    </div>
+    </motion.div>
   );
 }
