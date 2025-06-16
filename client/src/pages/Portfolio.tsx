@@ -22,6 +22,58 @@ interface PortfolioData {
   }>;
 }
 
+const getCoinGeckoId = (symbol: string) => {
+  const symbolMap: { [key: string]: string } = {
+    'BTC': 'bitcoin',
+    'ETH': 'ethereum',
+    'ADA': 'cardano',
+    'SOL': 'solana',
+    'MATIC': 'polygon',
+    'LINK': 'chainlink',
+    'AVAX': 'avalanche-2',
+    'BNB': 'binancecoin',
+    'XRP': 'ripple',
+    'DOGE': 'dogecoin',
+    'DOT': 'polkadot',
+    'SHIB': 'shiba-inu',
+    'UNI': 'uniswap',
+    'LTC': 'litecoin',
+    'ATOM': 'cosmos',
+    'ALGO': 'algorand',
+    'NEAR': 'near',
+    'VET': 'vechain',
+    'FIL': 'filecoin',
+    'TRX': 'tron'
+  };
+  return symbolMap[symbol] || symbol.toLowerCase();
+};
+
+const getCryptoName = (symbol: string) => {
+  const nameMap: { [key: string]: string } = {
+    'BTC': 'Bitcoin',
+    'ETH': 'Ethereum',
+    'ADA': 'Cardano',
+    'SOL': 'Solana',
+    'MATIC': 'Polygon',
+    'LINK': 'Chainlink',
+    'AVAX': 'Avalanche',
+    'BNB': 'BNB',
+    'XRP': 'XRP',
+    'DOGE': 'Dogecoin',
+    'DOT': 'Polkadot',
+    'SHIB': 'Shiba Inu',
+    'UNI': 'Uniswap',
+    'LTC': 'Litecoin',
+    'ATOM': 'Cosmos',
+    'ALGO': 'Algorand',
+    'NEAR': 'NEAR Protocol',
+    'VET': 'VeChain',
+    'FIL': 'Filecoin',
+    'TRX': 'TRON'
+  };
+  return nameMap[symbol] || symbol;
+};
+
 export default function Portfolio() {
   const { isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
