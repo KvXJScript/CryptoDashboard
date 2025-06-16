@@ -152,12 +152,14 @@ export default function PriceChart() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} />
                 <XAxis 
                   dataKey={activeTimeframe === "1" ? "time" : "date"}
-                  stroke="var(--muted-foreground)"
+                  stroke="var(--foreground)"
                   fontSize={12}
+                  tick={{ fill: 'var(--foreground)' }}
                 />
                 <YAxis 
-                  stroke="var(--muted-foreground)"
+                  stroke="var(--foreground)"
                   fontSize={12}
+                  tick={{ fill: 'var(--foreground)' }}
                   tickFormatter={(value) => `$${value.toLocaleString()}`}
                 />
                 <Tooltip 

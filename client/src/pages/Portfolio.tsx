@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import PortfolioDistribution from "@/components/PortfolioDistribution";
 import RecentTransactions from "@/components/RecentTransactions";
+import CryptoIcon from "@/components/CryptoIcon";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -164,21 +165,29 @@ export default function Portfolio() {
                     {portfolio.holdings
                       .filter(holding => parseFloat(holding.amount) > 0)
                       .map((holding) => (
-                      <div key={holding.symbol} className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/30 transition-colors">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-crypto-primary to-crypto-success rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">{holding.symbol}</span>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-foreground">{holding.symbol}</p>
+                      <div key={holding.symbol} className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/30 transition-colors border border-border/10">
+                        <div className="flex items-center space-x-4 flex-1">
+                          <CryptoIcon 
+                            coinId={getCoinGeckoId(holding.symbol)}
+                            symbol={holding.symbol}
+                            size="lg"
+                            className="ring-2 ring-border/20"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <p className="font-semibold text-foreground text-lg">{holding.symbol}</p>
+                              <span className="text-sm text-muted-foreground bg-muted/30 px-2 py-1 rounded">
+                                {parseFloat(holding.amount).toFixed(4)}
+                              </span>
+                            </div>
                             <p className="text-sm text-muted-foreground">
-                              {parseFloat(holding.amount).toFixed(4)} coins
+                              {getCryptoName(holding.symbol)}
                             </p>
                           </div>
                         </div>
 
-                        <div className="text-right">
-                          <p className="font-semibold text-foreground">
+                        <div className="text-right flex-shrink-0 mx-4">
+                          <p className="font-bold text-foreground text-lg">
                             {formatCurrency(holding.value)}
                           </p>
                           <p className="text-sm text-muted-foreground">
@@ -186,14 +195,16 @@ export default function Portfolio() {
                           </p>
                         </div>
 
-                        <div className="text-right">
-                          <p className={`font-semibold flex items-center ${
-                            holding.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
+                        <div className="text-right flex-shrink-0 min-w-[100px]">
+                          <p className={`font-semibold flex items-center justify-end text-sm px-2 py-1 rounded-full ${
+                            holding.change24h >= 0 
+                              ? "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/20" 
+                              : "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20"
                           }`}>
                             {holding.change24h >= 0 ? (
-                              <ArrowUp className="w-4 h-4 mr-1" />
+                              <ArrowUp className="w-3 h-3 mr-1" />
                             ) : (
-                              <ArrowDown className="w-4 h-4 mr-1" />
+                              <ArrowDown className="w-3 h-3 mr-1" />
                             )}
                             {formatPercent(holding.change24h)}
                           </p>

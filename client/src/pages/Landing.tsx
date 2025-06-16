@@ -33,14 +33,14 @@ export default function Landing() {
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
-          <h1 className="text-5xl font-bold text-foreground mb-6 leading-tight">
+          <h1 className="text-5xl font-bold text-white dark:text-white mb-6 leading-tight">
             Track, Trade, and
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-crypto-primary via-crypto-success to-crypto-warning">
               {" "}Grow{" "}
             </span>
             Your Crypto Portfolio
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-white/80 dark:text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
             A modern cryptocurrency portfolio tracking platform with simulated trading, 
             live price data, and professional-grade analytics. Start your crypto journey today.
           </p>
@@ -171,7 +171,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-crypto-card-dark border-t border-gray-200 dark:border-gray-700">
+      <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-3 mb-4">
