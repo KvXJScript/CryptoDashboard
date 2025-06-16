@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { useState } from "react";
+import CryptoIcon from "@/components/CryptoIcon";
 
 interface CryptoPrice {
   symbol: string;
@@ -35,15 +36,7 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
     return `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`;
   };
 
-  const getCryptoIcon = (symbol: string) => {
-    const icons: Record<string, string> = {
-      BTC: "https://images.unsplash.com/photo-1605792657660-596af9009e82?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40",
-      ETH: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40",
-      ADA: "https://images.unsplash.com/photo-1640340434855-6084b1f4901c?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40",
-      SOL: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40",
-    };
-    return icons[symbol] || "https://images.unsplash.com/photo-1605792657660-596af9009e82?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40";
-  };
+
 
   if (isLoading) {
     return (

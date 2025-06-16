@@ -9,7 +9,7 @@ import { z } from "zod";
 class CoinGeckoService {
   private baseUrl = "https://api.coingecko.com/api/v3";
 
-  async getCryptoPrices(symbols: string[] = ["bitcoin", "ethereum", "cardano", "solana", "polygon", "chainlink", "avalanche-2"]) {
+  async getCryptoPrices(symbols: string[] = ["bitcoin", "ethereum", "cardano", "solana", "polygon", "chainlink", "avalanche-2", "binancecoin", "ripple", "dogecoin", "polkadot", "shiba-inu", "uniswap", "litecoin", "cosmos", "algorand", "near", "vechain", "filecoin", "tron"]) {
     try {
       const symbolsString = symbols.join(",");
       const response = await fetch(
@@ -41,6 +41,40 @@ class CoinGeckoService {
       throw error;
     }
   }
+
+  async getCryptoDetails(coinId: string) {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`CoinGecko API error: ${response.statusText}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching crypto details:", error);
+      throw error;
+    }
+  }
+
+  async getHistoricalData(coinId: string, days: number = 7) {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/coins/${coinId}/market_chart?vs_currency=usd&days=${days}&interval=${days <= 1 ? 'hourly' : 'daily'}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`CoinGecko API error: ${response.statusText}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching historical data:", error);
+      throw error;
+    }
+  }
 }
 
 const coinGecko = new CoinGeckoService();
@@ -48,22 +82,48 @@ const coinGecko = new CoinGeckoService();
 // Symbol mapping for CoinGecko IDs
 const symbolToCoinGeckoId: Record<string, string> = {
   "BTC": "bitcoin",
-  "ETH": "ethereum",
+  "ETH": "ethereum", 
   "ADA": "cardano",
   "SOL": "solana",
   "MATIC": "polygon",
   "LINK": "chainlink",
-  "AVAX": "avalanche-2"
+  "AVAX": "avalanche-2",
+  "BNB": "binancecoin",
+  "XRP": "ripple",
+  "DOGE": "dogecoin",
+  "DOT": "polkadot",
+  "SHIB": "shiba-inu",
+  "UNI": "uniswap",
+  "LTC": "litecoin",
+  "ATOM": "cosmos",
+  "ALGO": "algorand",
+  "NEAR": "near",
+  "VET": "vechain",
+  "FIL": "filecoin",
+  "TRX": "tron"
 };
 
 const coinGeckoIdToSymbol: Record<string, string> = {
   "bitcoin": "BTC",
   "ethereum": "ETH",
-  "cardano": "ADA",
+  "cardano": "ADA", 
   "solana": "SOL",
   "polygon": "MATIC",
   "chainlink": "LINK",
-  "avalanche-2": "AVAX"
+  "avalanche-2": "AVAX",
+  "binancecoin": "BNB",
+  "ripple": "XRP",
+  "dogecoin": "DOGE",
+  "polkadot": "DOT",
+  "shiba-inu": "SHIB",
+  "uniswap": "UNI",
+  "litecoin": "LTC",
+  "cosmos": "ATOM",
+  "algorand": "ALGO",
+  "near": "NEAR",
+  "vechain": "VET",
+  "filecoin": "FIL",
+  "tron": "TRX"
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -302,6 +362,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error removing from watchlist:", error);
       res.status(500).json({ message: "Failed to remove from watchlist" });
+    }
+  });
+
+  // Crypto details endpoint for icons and additional data
+  app.get('/api/crypto/:coinId/details', async (req, res) => {
+    try {
+      const { coinId } = req.params;
+      const details = await coinGecko.getCryptoDetails(coinId);
+      
+      res.json({
+        id: details.id,
+        symbol: details.symbol.toUpperCase(),
+        name: details.name,
+        image: details.image?.large || details.image?.small,
+        current_price: details.market_data?.current_price?.usd,
+        price_change_24h: details.market_data?.price_change_percentage_24h,
+        market_cap: details.market_data?.market_cap?.usd,
+        market_cap_rank: details.market_cap_rank,
+        total_volume: details.market_data?.total_volume?.usd,
+        description: details.description?.en?.substring(0, 500)
+      });
+    } catch (error) {
+      console.error("Error fetching crypto details:", error);
+      res.status(500).json({ message: "Failed to fetch crypto details" });
+    }
+  });
+
+  // Historical data endpoint for charts
+  app.get('/api/crypto/:coinId/history', async (req, res) => {
+    try {
+      const { coinId } = req.params;
+      const days = parseInt(req.query.days as string) || 7;
+      const data = await coinGecko.getHistoricalData(coinId, days);
+      
+      // Transform the data for easier frontend consumption
+      const chartData = data.prices.map((price: [number, number], index: number) => ({
+        timestamp: price[0],
+        price: price[1],
+        volume: data.total_volumes[index]?.[1] || 0
+      }));
+      
+      res.json(chartData);
+    } catch (error) {
+      console.error("Error fetching historical data:", error);
+      res.status(500).json({ message: "Failed to fetch historical data" });
     }
   });
 
