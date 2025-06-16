@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
@@ -85,9 +86,14 @@ export default function PriceChart() {
   const portfolioChange = calculatePortfolioChange();
 
   return (
-    <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
-      <CardContent className="p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl hover-lift">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div className="flex items-center space-x-4">
             <h2 className="text-lg font-semibold text-foreground">Portfolio Performance</h2>
             <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-sm font-medium ${
@@ -185,7 +191,8 @@ export default function PriceChart() {
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
