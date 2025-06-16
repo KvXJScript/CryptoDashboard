@@ -98,7 +98,90 @@
   .crypto-warning {
     color: var(--crypto-warning);
   }
-  
+
+  /* Modern glass morphism effects */
+  .glass-card {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+
+  .dark .glass-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Gradient animations */
+  .gradient-animation {
+    background: linear-gradient(-45deg, var(--crypto-primary), var(--crypto-success), var(--crypto-warning), var(--crypto-danger));
+    background-size: 400% 400%;
+    animation: gradientShift 4s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Floating animation */
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+
+  /* Pulse glow effect */
+  .pulse-glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    animation: pulseGlow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulseGlow {
+    from { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+    to { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Modern hover effects */
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Neon glow effects */
+  .neon-blue {
+    box-shadow: 0 0 5px theme(colors.blue.400), 0 0 20px theme(colors.blue.400), 0 0 35px theme(colors.blue.400);
+  }
+
+  .neon-green {
+    box-shadow: 0 0 5px theme(colors.green.400), 0 0 20px theme(colors.green.400), 0 0 35px theme(colors.green.400);
+  }
+
+  .neon-red {
+    box-shadow: 0 0 5px #f87171, 0 0 20px #f87171, 0 0 35px #f87171;
+  }
+
   .bg-crypto-success {
     background-color: var(--crypto-success);
   }

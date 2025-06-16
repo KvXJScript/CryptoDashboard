@@ -1,8 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, X } from "lucide-react";
+import { Plus, X, ArrowUp, ArrowDown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import CryptoIcon from "@/components/CryptoIcon";
+import { motion } from "framer-motion";
 
 interface WatchlistItem {
   id: number;
@@ -139,41 +141,50 @@ export default function Watchlist() {
           </div>
         ) : (
           <div className="space-y-4">
-            {watchlist.map((item) => (
-              <div key={item.id} className="flex items-center justify-between group">
+            {watchlist.map((item, index) => (
+              <motion.div 
+                key={item.id} 
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-all duration-200 group"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
                 <div className="flex items-center space-x-3">
-                  <img
-                    src={getCryptoIcon(item.symbol)}
-                    alt={`${item.symbol} logo`}
-                    className="w-6 h-6 rounded-full object-cover"
+                  <CryptoIcon 
+                    coinId={item.symbol.toLowerCase()}
+                    symbol={item.symbol}
+                    size="sm"
+                    className="ring-1 ring-border/20"
                   />
                   <div>
-                    <p className="text-sm font-medium">{getCryptoName(item.symbol)}</p>
-                    <p className="text-xs text-gray-500">{item.symbol}</p>
+                    <p className="text-sm font-medium text-foreground">{item.symbol}</p>
+                    <p className="text-xs text-muted-foreground">{formatPrice(item.price)}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="text-right">
-                    <p className="text-sm font-medium">{formatPrice(item.price)}</p>
-                    <p
-                      className={`text-xs ${
-                        item.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
-                      }`}
-                    >
+                    <p className={`text-sm font-medium flex items-center ${
+                      item.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
+                    }`}>
+                      {item.change24h >= 0 ? (
+                        <ArrowUp className="w-3 h-3 mr-1" />
+                      ) : (
+                        <ArrowDown className="w-3 h-3 mr-1" />
+                      )}
                       {formatPercent(item.change24h)}
                     </p>
                   </div>
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
+                    className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-crypto-danger"
                     onClick={() => removeFromWatchlistMutation.mutate(item.symbol)}
                     disabled={removeFromWatchlistMutation.isPending}
                   >
                     <X className="w-3 h-3" />
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
