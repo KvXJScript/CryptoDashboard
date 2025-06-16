@@ -110,24 +110,32 @@ export default function Dashboard() {
       />
 
       {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 glass-card border-t border-border/40 md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 glass-card border-t border-border/40 md:hidden z-10">
         <div className="flex items-center justify-around py-3">
-          <button className="flex flex-col items-center space-y-1 text-crypto-primary">
-            <Home className="w-5 h-5" />
-            <span className="text-xs font-medium">Home</span>
-          </button>
-          <button className="flex flex-col items-center space-y-1 text-muted-foreground hover:text-crypto-primary transition-colors">
-            <PieChart className="w-5 h-5" />
-            <span className="text-xs">Portfolio</span>
-          </button>
-          <button className="flex flex-col items-center space-y-1 text-muted-foreground hover:text-crypto-primary transition-colors">
-            <ArrowUpDown className="w-5 h-5" />
-            <span className="text-xs">Trade</span>
-          </button>
-          <button className="flex flex-col items-center space-y-1 text-muted-foreground hover:text-crypto-primary transition-colors">
-            <Star className="w-5 h-5" />
-            <span className="text-xs">Watchlist</span>
-          </button>
+          <Link href="/">
+            <span className="flex flex-col items-center space-y-1 text-crypto-primary cursor-pointer">
+              <Home className="w-5 h-5" />
+              <span className="text-xs font-medium">Home</span>
+            </span>
+          </Link>
+          <Link href="/portfolio">
+            <span className="flex flex-col items-center space-y-1 text-muted-foreground hover:text-crypto-primary transition-colors cursor-pointer">
+              <PieChart className="w-5 h-5" />
+              <span className="text-xs">Portfolio</span>
+            </span>
+          </Link>
+          <Link href="/trade">
+            <span className="flex flex-col items-center space-y-1 text-muted-foreground hover:text-crypto-primary transition-colors cursor-pointer">
+              <ArrowUpDown className="w-5 h-5" />
+              <span className="text-xs">Trade</span>
+            </span>
+          </Link>
+          <Link href="/watchlist">
+            <span className="flex flex-col items-center space-y-1 text-muted-foreground hover:text-crypto-primary transition-colors cursor-pointer">
+              <Star className="w-5 h-5" />
+              <span className="text-xs">Watchlist</span>
+            </span>
+          </Link>
         </div>
       </div>
     </div>

@@ -7,6 +7,9 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
+import Portfolio from "@/pages/Portfolio";
+import Trade from "@/pages/Trade";
+import WatchlistPage from "@/pages/WatchlistPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -19,6 +22,9 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Dashboard} />
+          <Route path="/portfolio" component={Portfolio} />
+          <Route path="/trade" component={Trade} />
+          <Route path="/watchlist" component={WatchlistPage} />
         </>
       )}
       <Route component={NotFound} />

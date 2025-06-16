@@ -37,15 +37,15 @@ export default function Header() {
           <nav className="hidden md:flex space-x-8">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
-                <a
-                  className={`transition-colors font-medium ${
+                <span
+                  className={`transition-colors font-medium cursor-pointer ${
                     item.active
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-crypto-primary"
                   }`}
                 >
                   {item.label}
-                </a>
+                </span>
               </Link>
             ))}
           </nav>
