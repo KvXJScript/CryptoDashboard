@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
+import CryptoIcon from "@/components/CryptoIcon";
+import { motion } from "framer-motion";
 
 interface PortfolioData {
   totalValue: number;
@@ -130,15 +132,43 @@ export default function PortfolioDistribution() {
         {/* Distribution List */}
         <div className="space-y-3">
           {distributionData.map((item, index) => (
-            <div key={item.name} className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div
-                  className={`w-3 h-3 rounded-full ${colors[index % colors.length]}`}
-                ></div>
-                <span className="text-sm">{item.name}</span>
+            <motion.div 
+              key={item.name} 
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-all duration-200"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <div className="flex items-center space-x-3">
+                {item.name !== "Cash" ? (
+                  <CryptoIcon 
+                    coinId={item.name.toLowerCase()}
+                    symbol={item.name}
+                    size="sm"
+                    className="ring-1 ring-border/20"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">$</span>
+                  </div>
+                )}
+                <div>
+                  <span className="text-sm font-medium text-foreground">{item.name}</span>
+                  <p className="text-xs text-muted-foreground">{formatCurrency(item.value)}</p>
+                </div>
               </div>
-              <span className="text-sm font-medium">{item.percentage}%</span>
-            </div>
+              <div className="text-right">
+                <span className="text-sm font-semibold text-foreground">{item.percentage}%</span>
+                <div className="w-16 h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
+                  <motion.div 
+                    className={`h-full ${colors[index % colors.length]}`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${item.percentage}%` }}
+                    transition={{ duration: 0.8, delay: index * 0.1 + 0.3 }}
+                  />
+                </div>
+              </div>
+            </motion.div>
           ))}
         </div>
       </CardContent>

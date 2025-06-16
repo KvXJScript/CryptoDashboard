@@ -97,10 +97,11 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
               className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/50 transition-all duration-300 group cursor-pointer"
             >
               <div className="flex items-center space-x-4">
-                <img
-                  src={getCryptoIcon(crypto.symbol)}
-                  alt={`${crypto.name} logo`}
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-border/20"
+                <CryptoIcon 
+                  coinId={crypto.coinGeckoId}
+                  symbol={crypto.symbol}
+                  size="lg"
+                  className="ring-2 ring-border/20"
                 />
                 <div>
                   <p className="font-medium text-foreground">{crypto.name}</p>
