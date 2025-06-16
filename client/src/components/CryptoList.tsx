@@ -88,11 +88,11 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
   }
 
   return (
-    <Card>
+    <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold">Live Prices</h2>
-          <button className="text-sm text-crypto-primary hover:underline">
+          <h2 className="text-lg font-semibold text-foreground">Live Prices</h2>
+          <button className="text-sm text-crypto-primary hover:text-crypto-primary/80 transition-colors">
             View all
           </button>
         </div>
@@ -101,23 +101,23 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
           {cryptos?.map((crypto) => (
             <div
               key={crypto.symbol}
-              className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+              className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/50 transition-all duration-300 group cursor-pointer"
             >
               <div className="flex items-center space-x-4">
                 <img
                   src={getCryptoIcon(crypto.symbol)}
                   alt={`${crypto.name} logo`}
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-10 h-10 rounded-full object-cover ring-2 ring-border/20"
                 />
                 <div>
-                  <p className="font-medium">{crypto.name}</p>
-                  <p className="text-sm text-gray-500">{crypto.symbol}</p>
+                  <p className="font-medium text-foreground">{crypto.name}</p>
+                  <p className="text-sm text-muted-foreground">{crypto.symbol}</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-semibold">{formatPrice(crypto.price)}</p>
+                <p className="font-semibold text-foreground">{formatPrice(crypto.price)}</p>
                 <p
-                  className={`text-sm flex items-center justify-end ${
+                  className={`text-sm flex items-center justify-end font-medium ${
                     crypto.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
                   }`}
                 >

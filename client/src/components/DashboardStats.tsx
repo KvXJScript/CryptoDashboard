@@ -92,10 +92,10 @@ export default function DashboardStats() {
         </Card>
 
         {/* Today's P&L */}
-        <Card>
+        <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <h3 className="text-sm font-medium text-muted-foreground">
                 Today's P&L
               </h3>
               <TrendingUp className={`w-5 h-5 ${todayPnL >= 0 ? "text-crypto-success" : "text-crypto-danger"}`} />
@@ -117,19 +117,19 @@ export default function DashboardStats() {
         </Card>
 
         {/* Available Cash */}
-        <Card>
+        <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <h3 className="text-sm font-medium text-muted-foreground">
                 Available Cash
               </h3>
-              <DollarSign className="w-5 h-5 text-gray-400" />
+              <DollarSign className="w-5 h-5 text-muted-foreground" />
             </div>
             <div className="space-y-2">
-              <p className="text-2xl font-bold">
+              <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(portfolio?.availableCash || 0)}
               </p>
-              <button className="text-sm text-crypto-primary hover:underline">
+              <button className="text-sm text-crypto-primary hover:text-crypto-primary/80 transition-colors">
                 Add funds
               </button>
             </div>

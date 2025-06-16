@@ -110,21 +110,21 @@ export default function Dashboard() {
       />
 
       {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-crypto-card-dark border-t border-gray-200 dark:border-gray-700 md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 glass-card border-t border-border/40 md:hidden">
         <div className="flex items-center justify-around py-3">
           <button className="flex flex-col items-center space-y-1 text-crypto-primary">
             <Home className="w-5 h-5" />
-            <span className="text-xs">Home</span>
+            <span className="text-xs font-medium">Home</span>
           </button>
-          <button className="flex flex-col items-center space-y-1 text-gray-400">
+          <button className="flex flex-col items-center space-y-1 text-muted-foreground hover:text-crypto-primary transition-colors">
             <PieChart className="w-5 h-5" />
             <span className="text-xs">Portfolio</span>
           </button>
-          <button className="flex flex-col items-center space-y-1 text-gray-400">
+          <button className="flex flex-col items-center space-y-1 text-muted-foreground hover:text-crypto-primary transition-colors">
             <ArrowUpDown className="w-5 h-5" />
             <span className="text-xs">Trade</span>
           </button>
-          <button className="flex flex-col items-center space-y-1 text-gray-400">
+          <button className="flex flex-col items-center space-y-1 text-muted-foreground hover:text-crypto-primary transition-colors">
             <Star className="w-5 h-5" />
             <span className="text-xs">Watchlist</span>
           </button>
