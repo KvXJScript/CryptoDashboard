@@ -69,16 +69,16 @@ export default function DashboardStats() {
     <div className="mb-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Portfolio Value */}
-        <Card>
+        <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <h3 className="text-sm font-medium text-muted-foreground">
                 Portfolio Value
               </h3>
               <Wallet className="w-5 h-5 text-crypto-primary" />
             </div>
             <div className="space-y-2">
-              <p className="text-2xl font-bold">
+              <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(portfolio?.totalValue || 0)}
               </p>
               <p className="text-sm text-crypto-success flex items-center">

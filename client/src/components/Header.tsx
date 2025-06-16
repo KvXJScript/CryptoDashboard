@@ -5,11 +5,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { Moon, Sun, ChartLine, Menu, ChevronDown } from "lucide-react";
+import type { User } from "@shared/schema";
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const [location] = useLocation();
+  
+
 
   const navItems = [
     { href: "/", label: "Dashboard", active: location === "/" },
