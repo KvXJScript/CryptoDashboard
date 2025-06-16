@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { useState } from "react";
 import CryptoIcon from "@/components/CryptoIcon";
@@ -91,10 +92,15 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
         </div>
 
         <div className="space-y-4">
-          {cryptos?.map((crypto) => (
-            <div
+          {cryptos?.map((crypto, index) => (
+            <motion.div
               key={crypto.symbol}
-              className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/50 transition-all duration-300 group cursor-pointer"
+              className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/50 transition-all duration-300 group cursor-pointer hover-lift relative overflow-hidden"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ scale: 1.02 }}
+              onHoverStart={() => {}}
             >
               <div className="flex items-center space-x-4">
                 <CryptoIcon 
@@ -140,7 +146,7 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
                   Sell
                 </Button>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </CardContent>

@@ -136,29 +136,6 @@
     100% { transform: translateY(0px); }
   }
 
-  /* Pulse glow effect */
-  .pulse-glow {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-    animation: pulseGlow 2s ease-in-out infinite alternate;
-  }
-
-  @keyframes pulseGlow {
-    from { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
-    to { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
-  }
-
-  /* Shimmer effect */
-  .shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-  }
-
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-
   /* Modern hover effects */
   .hover-lift {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -169,19 +146,7 @@
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
 
-  /* Neon glow effects */
-  .neon-blue {
-    box-shadow: 0 0 5px theme(colors.blue.400), 0 0 20px theme(colors.blue.400), 0 0 35px theme(colors.blue.400);
-  }
-
-  .neon-green {
-    box-shadow: 0 0 5px theme(colors.green.400), 0 0 20px theme(colors.green.400), 0 0 35px theme(colors.green.400);
-  }
-
-  .neon-red {
-    box-shadow: 0 0 5px #f87171, 0 0 20px #f87171, 0 0 35px #f87171;
-  }
-
+  /* Background utilities */
   .bg-crypto-success {
     background-color: var(--crypto-success);
   }
@@ -212,50 +177,5 @@
   
   .border-crypto-warning {
     border-color: var(--crypto-warning);
-  }
-  
-  /* Glass morphism effects */
-  .glass-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .dark .glass-card {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Gradient animations */
-  .gradient-animation {
-    background: linear-gradient(270deg, var(--crypto-primary), var(--crypto-success), var(--crypto-warning));
-    background-size: 600% 600%;
-    animation: gradientShift 3s ease infinite;
-  }
-  
-  @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  
-  /* Modern scrollbars */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: var(--muted);
-    border-radius: 4px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--crypto-primary);
-    border-radius: 4px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: var(--crypto-success);
   }
 }
