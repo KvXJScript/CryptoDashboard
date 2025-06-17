@@ -303,7 +303,7 @@ export default function Trade() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Trading Modal */}
