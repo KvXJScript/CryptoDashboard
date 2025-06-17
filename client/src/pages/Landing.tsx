@@ -97,6 +97,190 @@ function ParticleBackground() {
   );
 }
 
+// Animated Line Chart Component
+function AnimatedLineChart() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [timeframe, setTimeframe] = useState<'1D' | '1W' | '1M'>('1D');
+  const [animationProgress, setAnimationProgress] = useState(0);
+
+  // Sample data for different timeframes
+  const chartData = {
+    '1D': [
+      { time: '00:00', value: 24000 },
+      { time: '04:00', value: 24200 },
+      { time: '08:00', value: 24500 },
+      { time: '12:00', value: 24800 },
+      { time: '16:00', value: 24600 },
+      { time: '20:00', value: 24891 },
+    ],
+    '1W': [
+      { time: 'Mon', value: 23500 },
+      { time: 'Tue', value: 24100 },
+      { time: 'Wed', value: 24300 },
+      { time: 'Thu', value: 24600 },
+      { time: 'Fri', value: 24800 },
+      { time: 'Sat', value: 24700 },
+      { time: 'Sun', value: 24891 },
+    ],
+    '1M': [
+      { time: 'Week 1', value: 22800 },
+      { time: 'Week 2', value: 23200 },
+      { time: 'Week 3', value: 23800 },
+      { time: 'Week 4', value: 24891 },
+    ],
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = canvas.offsetWidth * 2;
+    canvas.height = canvas.offsetHeight * 2;
+    ctx.scale(2, 2);
+
+    const data = chartData[timeframe];
+    const padding = 40;
+    const chartWidth = canvas.offsetWidth - padding * 2;
+    const chartHeight = canvas.offsetHeight - padding * 2;
+
+    // Clear canvas
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+
+    // Draw grid
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = padding + (chartHeight / 4) * i;
+      ctx.beginPath();
+      ctx.moveTo(padding, y);
+      ctx.lineTo(canvas.offsetWidth - padding, y);
+      ctx.stroke();
+    }
+
+    // Calculate min/max values
+    const values = data.map(d => d.value);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const valueRange = maxValue - minValue;
+
+    // Draw animated line
+    ctx.strokeStyle = '#00ff88';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+
+    const animatedLength = Math.floor(data.length * animationProgress);
+    const partialProgress = (data.length * animationProgress) % 1;
+
+    for (let i = 0; i <= animatedLength && i < data.length; i++) {
+      const x = padding + (chartWidth / (data.length - 1)) * i;
+      const normalizedValue = (data[i].value - minValue) / valueRange;
+      const y = padding + chartHeight - (normalizedValue * chartHeight);
+
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+
+      // Draw points
+      ctx.save();
+      ctx.fillStyle = '#00ff88';
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Draw partial line for smooth animation
+    if (animatedLength < data.length - 1 && partialProgress > 0) {
+      const currentIndex = animatedLength;
+      const nextIndex = currentIndex + 1;
+      
+      const currentX = padding + (chartWidth / (data.length - 1)) * currentIndex;
+      const nextX = padding + (chartWidth / (data.length - 1)) * nextIndex;
+      
+      const currentY = padding + chartHeight - ((data[currentIndex].value - minValue) / valueRange * chartHeight);
+      const nextY = padding + chartHeight - ((data[nextIndex].value - minValue) / valueRange * chartHeight);
+      
+      const interpolatedX = currentX + (nextX - currentX) * partialProgress;
+      const interpolatedY = currentY + (nextY - currentY) * partialProgress;
+      
+      ctx.lineTo(interpolatedX, interpolatedY);
+    }
+
+    ctx.stroke();
+
+    // Draw glow effect
+    ctx.shadowColor = '#00ff88';
+    ctx.shadowBlur = 20;
+    ctx.stroke();
+    
+  }, [timeframe, animationProgress]);
+
+  useEffect(() => {
+    setAnimationProgress(0);
+    const startTime = Date.now();
+    const duration = 2000; // 2 seconds
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function for smooth animation
+      const easedProgress = progress * progress * (3 - 2 * progress);
+      setAnimationProgress(easedProgress);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    animate();
+  }, [timeframe]);
+
+  return (
+    <div className="bg-black rounded-2xl p-6 border-2 border-gray-700 shadow-2xl">
+      {/* Chart Controls */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="bg-gray-800 border border-gray-600 rounded-lg p-2 shadow-lg">
+          <div className="text-2xl font-bold text-white">$24,891.45</div>
+          <div className="text-green-400 flex items-center text-sm">
+            <TrendingUp className="w-4 h-4 mr-1" />
+            +5.2% Growth
+          </div>
+        </div>
+        
+        <div className="flex space-x-2">
+          {(['1D', '1W', '1M'] as const).map((period) => (
+            <button
+              key={period}
+              onClick={() => setTimeframe(period)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                timeframe === period
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              {period}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Chart Canvas */}
+      <canvas
+        ref={canvasRef}
+        className="w-full h-64 rounded-lg"
+        style={{ display: 'block' }}
+      />
+    </div>
+  );
+}
+
 export default function Landing() {
   const handleLogin = () => {
     window.location.href = "/api/login";
@@ -106,7 +290,7 @@ export default function Landing() {
     <div className="min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #080480 0%, #0a0690 50%, #080480 100%)' }}>
       <ParticleBackground />
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-lg bg-blue-900/20 border-b border-white/10" style={{ zIndex: 10 }}>
+      <header className="sticky top-0 z-50 backdrop-blur-lg border-b border-white/10" style={{ zIndex: 10, backgroundColor: 'rgba(8, 4, 128, 0.3)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
@@ -158,31 +342,9 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Hero Image/Chart Placeholder */}
+        {/* Hero Chart Section */}
         <div className="mt-16 relative">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 border border-white/20 backdrop-blur-xl">
-            <div className="h-64 bg-white rounded-2xl flex items-end justify-center relative overflow-hidden">
-              <div className="absolute inset-0 flex items-end justify-between px-6 pb-6">
-                {[60, 45, 70, 55, 80, 75, 90, 85, 95, 100].map((height, index) => (
-                  <div
-                    key={index}
-                    className="w-4 bg-gradient-to-t from-blue-500 to-blue-700 rounded-t-lg transition-all duration-1000 hover:from-blue-600 hover:to-blue-800 transform hover:scale-110"
-                    style={{ 
-                      height: `${height}%`,
-                      animationDelay: `${index * 100}ms`,
-                    }}
-                  />
-                ))}
-              </div>
-              <div className="text-center z-10 mb-8">
-                <p className="text-3xl font-bold text-gray-800 mb-2">$24,891.45</p>
-                <p className="text-green-600 flex items-center justify-center font-medium">
-                  <TrendingUp className="w-5 h-5 mr-2" />
-                  +5.2% Portfolio Growth
-                </p>
-              </div>
-            </div>
-          </div>
+          <AnimatedLineChart />
         </div>
       </section>
 
@@ -246,7 +408,7 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-blue-800/80 backdrop-blur-sm relative" style={{ zIndex: 2 }}>
+      <section className="backdrop-blur-sm relative" style={{ zIndex: 2, backgroundColor: 'rgba(8, 4, 128, 0.6)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-white mb-4">
