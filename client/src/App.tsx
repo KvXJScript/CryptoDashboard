@@ -10,6 +10,7 @@ import Dashboard from "@/pages/Dashboard";
 import Portfolio from "@/pages/Portfolio";
 import Trade from "@/pages/Trade";
 import WatchlistPage from "@/pages/WatchlistPage";
+import FAQ from "@/pages/FAQ";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
           <Route path="/portfolio" component={Portfolio} />
           <Route path="/trade" component={Trade} />
           <Route path="/watchlist" component={WatchlistPage} />
+          <Route path="/faq" component={FAQ} />
         </>
       )}
       <Route component={NotFound} />

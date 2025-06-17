@@ -37,7 +37,7 @@ export default function DashboardStats() {
     return total + changeValue;
   }, 0) || 0;
 
-  const portfolioPercentage = portfolio?.totalValue > 0 ? (todayPnL / portfolio.totalValue) * 100 : 0;
+  const portfolioPercentage = portfolio?.totalValue && portfolio.totalValue > 0 ? (todayPnL / portfolio.totalValue) * 100 : 0;
   const totalInvested = 10000; // Initial portfolio value
   const totalReturn = portfolio?.totalValue ? portfolio.totalValue - totalInvested : 0;
   const totalReturnPercentage = totalInvested > 0 ? (totalReturn / totalInvested) * 100 : 0;
@@ -88,8 +88,14 @@ export default function DashboardStats() {
               <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(portfolio?.totalValue || 0)}
               </p>
-              <p className="text-sm text-crypto-success flex items-center">
-                <ArrowUp className="w-3 h-3 mr-1" />
+              <p className={`text-sm flex items-center ${
+                todayPnL >= 0 ? "text-crypto-success" : "text-crypto-danger"
+              }`}>
+                {todayPnL >= 0 ? (
+                  <ArrowUp className="w-3 h-3 mr-1" />
+                ) : (
+                  <ArrowDown className="w-3 h-3 mr-1" />
+                )}
                 <span>
                   {formatCurrency(Math.abs(todayPnL))} ({formatPercent(((todayPnL / (portfolio?.totalValue || 1)) * 100))})
                 </span>

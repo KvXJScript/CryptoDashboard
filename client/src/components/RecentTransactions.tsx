@@ -116,7 +116,9 @@ export default function RecentTransactions() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium">
+                <p className={`text-sm font-medium ${
+                  transaction.type === "buy" ? "text-crypto-success" : "text-crypto-danger"
+                }`}>
                   {transaction.type === "buy" ? "+" : "-"}
                   {formatAmount(transaction.amount, transaction.symbol)}
                 </p>
