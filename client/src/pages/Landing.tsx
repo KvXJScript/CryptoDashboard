@@ -115,8 +115,8 @@ function ParticleBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 pointer-events-none"
-      style={{ zIndex: 1 }}
+      className="fixed inset-0 pointer-events-none"
+      style={{ zIndex: 0 }}
     />
   );
 }
@@ -195,7 +195,7 @@ function AnimatedLineChart() {
       
       // Add price labels with better positioning to avoid overlap
       const priceValue = maxValue - (i * valueRange / 4);
-      ctx.fillText(`$${priceValue.toLocaleString()}`, 8, y - 8);
+      ctx.fillText(`$${priceValue.toLocaleString()}`, padding + 20, y - 8);
     }
     
     // Draw vertical grid lines (time)
@@ -343,7 +343,7 @@ function AnimatedLineChart() {
     <div className="bg-black rounded-2xl p-6 border-2 border-purple-500/30 shadow-2xl glass-modern">
       {/* Chart Controls */}
       <div className="flex justify-between items-center mb-4">
-        <div className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 border border-purple-400/30 rounded-lg p-3 shadow-lg backdrop-blur-sm">
+        <div className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 border border-green-400/30 rounded-lg p-3 shadow-lg backdrop-blur-sm">
           <div className="text-2xl font-bold text-white">$24,891.45</div>
           <div className="text-green-400 flex items-center text-sm">
             <TrendingUp className="w-4 h-4 mr-1" />
@@ -358,7 +358,7 @@ function AnimatedLineChart() {
               onClick={() => setTimeframe(period)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
                 timeframe === period
-                  ? 'bg-green-500 text-black shadow-lg animate-pulse border-2 border-green-400'
+                  ? 'bg-green-500 text-black shadow-lg border-2 border-green-400'
                   : 'bg-gray-800/80 text-gray-300 hover:bg-gray-700/90 border border-gray-600 backdrop-blur-sm'
               }`}
             >
@@ -433,6 +433,7 @@ export default function Landing() {
               size="lg"
               variant="outline"
               className="px-8 py-3 text-lg border-white/30 text-white hover:bg-white/10 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 backdrop-blur-sm"
+              onClick={() => document.getElementById('features-section')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Learn More
             </Button>
@@ -446,10 +447,10 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative" style={{ zIndex: 2 }}>
+      <section id="features-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative" style={{ zIndex: 2 }}>
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Everything you need to manage your crypto portfolio
+          <h2 className="text-4xl font-bold text-white mb-4">
+            Everything you need to master crypto trading
           </h2>
           <p className="text-lg text-white/80 max-w-2xl mx-auto">
             Professional-grade tools and real-time data to help you make informed investment decisions.
@@ -458,57 +459,116 @@ export default function Landing() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Feature 1 */}
-          <Card className="glass-modern hover:scale-105 transition-all duration-300 animate-slide-in-left animate-delay-200">
-            <CardContent className="p-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-lg flex items-center justify-center mb-4 animate-bounce-subtle">
-                <ChartLine className="w-6 h-6 text-blue-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Live Price Tracking
-              </h3>
-              <p className="text-white/80">
-                Real-time cryptocurrency prices powered by CoinGecko API with 24/7 market data updates.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="glass-modern p-8 rounded-2xl hover:scale-105 transition-all duration-500 animate-slide-in-left animate-delay-200 hover:shadow-2xl hover:shadow-green-500/20">
+            <div className="w-16 h-16 bg-green-500/20 rounded-xl flex items-center justify-center mb-6 animate-bounce-subtle">
+              <ChartLine className="w-8 h-8 text-green-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Live Price Tracking
+            </h3>
+            <p className="text-white/80 text-lg leading-relaxed">
+              Real-time cryptocurrency prices powered by CoinGecko API with 24/7 market data updates and advanced charting.
+            </p>
+          </div>
 
           {/* Feature 2 */}
-          <Card className="glass-modern hover:scale-105 transition-all duration-300 animate-slide-up animate-delay-300">
-            <CardContent className="p-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500/30 to-emerald-500/30 rounded-lg flex items-center justify-center mb-4 animate-bounce-subtle animate-delay-100">
-                <Zap className="w-6 h-6 text-green-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Simulated Trading
-              </h3>
-              <p className="text-white/80">
-                Practice trading with virtual funds. Perfect for learning without financial risk.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="glass-modern p-8 rounded-2xl hover:scale-105 transition-all duration-500 animate-slide-up animate-delay-300 hover:shadow-2xl hover:shadow-blue-500/20">
+            <div className="w-16 h-16 bg-blue-500/20 rounded-xl flex items-center justify-center mb-6 animate-bounce-subtle animate-delay-100">
+              <Zap className="w-8 h-8 text-blue-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Simulated Trading
+            </h3>
+            <p className="text-white/80 text-lg leading-relaxed">
+              Practice trading with virtual funds. Perfect for learning strategies without financial risk or market pressure.
+            </p>
+          </div>
 
           {/* Feature 3 */}
-          <Card className="glass-modern hover:scale-105 transition-all duration-300 animate-slide-in-right animate-delay-400">
-            <CardContent className="p-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-lg flex items-center justify-center mb-4 animate-bounce-subtle animate-delay-200">
-                <Shield className="w-6 h-6 text-purple-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Portfolio Analytics
-              </h3>
-              <p className="text-white/80">
-                Comprehensive portfolio analysis with performance metrics and distribution charts.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="glass-modern p-8 rounded-2xl hover:scale-105 transition-all duration-500 animate-slide-in-right animate-delay-400 hover:shadow-2xl hover:shadow-purple-500/20">
+            <div className="w-16 h-16 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6 animate-bounce-subtle animate-delay-200">
+              <Shield className="w-8 h-8 text-purple-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Portfolio Analytics
+            </h3>
+            <p className="text-white/80 text-lg leading-relaxed">
+              Comprehensive portfolio analysis with performance metrics, distribution charts, and advanced insights.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative" style={{ zIndex: 2 }}>
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-white mb-4 animate-fade-in">
+            Trusted by crypto enthusiasts worldwide
+          </h2>
+          <p className="text-lg text-white/80 max-w-2xl mx-auto animate-slide-up animate-delay-200">
+            Join our growing community of traders and investors
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="text-center animate-scale-in animate-delay-200">
+            <div className="text-5xl font-bold text-green-400 mb-2">50K+</div>
+            <div className="text-white/80 text-lg">Active Users</div>
+          </div>
+          <div className="text-center animate-scale-in animate-delay-400">
+            <div className="text-5xl font-bold text-blue-400 mb-2">$2M+</div>
+            <div className="text-white/80 text-lg">Virtual Trades</div>
+          </div>
+          <div className="text-center animate-scale-in animate-delay-600">
+            <div className="text-5xl font-bold text-purple-400 mb-2">99.9%</div>
+            <div className="text-white/80 text-lg">Uptime</div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it Works Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative" style={{ zIndex: 2 }}>
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-white mb-4 animate-fade-in">
+            How it works
+          </h2>
+          <p className="text-lg text-white/80 max-w-2xl mx-auto animate-slide-up animate-delay-200">
+            Get started in minutes with our simple three-step process
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="text-center animate-slide-in-left animate-delay-200">
+            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-green-400 border-2 border-green-400/30">
+              1
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">Sign Up</h3>
+            <p className="text-white/80">Create your free account and get $10,000 in virtual trading funds</p>
+          </div>
+          
+          <div className="text-center animate-slide-up animate-delay-400">
+            <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-blue-400 border-2 border-blue-400/30">
+              2
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">Track & Analyze</h3>
+            <p className="text-white/80">Monitor real-time prices and analyze market trends with our advanced tools</p>
+          </div>
+          
+          <div className="text-center animate-slide-in-right animate-delay-600">
+            <div className="w-20 h-20 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-purple-400 border-2 border-purple-400/30">
+              3
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">Trade & Learn</h3>
+            <p className="text-white/80">Practice trading strategies and build your portfolio with confidence</p>
+          </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="backdrop-blur-sm relative animate-fade-in" style={{ zIndex: 2, backgroundColor: 'rgba(2, 0, 59, 0.8)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <section className="backdrop-blur-sm relative animate-fade-in border-t-2 border-green-500/30" style={{ zIndex: 2, backgroundColor: 'rgba(50, 50, 50, 0.9)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4 animate-slide-up">
+            <h2 className="text-4xl font-bold text-white mb-6 animate-slide-up">
               Ready to start your crypto journey?
             </h2>
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto animate-slide-up animate-delay-200">
@@ -517,27 +577,76 @@ export default function Landing() {
             <Button
               size="lg"
               onClick={handleLogin}
-              className="bg-gradient-to-r from-purple-600/30 to-pink-600/30 hover:from-purple-600/50 hover:to-pink-600/50 text-white border border-white/30 px-8 py-3 text-lg font-semibold backdrop-blur-sm animate-pulse-glow animate-delay-400 transition-all duration-300 transform hover:scale-105"
+              className="bg-green-500 hover:bg-green-400 text-black px-12 py-4 text-xl font-bold backdrop-blur-sm animate-delay-400 transition-all duration-300 transform hover:scale-110 shadow-2xl shadow-green-500/30 hover:shadow-green-400/40"
             >
-              Get Started Now
+              Get Started Now - Free
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 relative" style={{ zIndex: 2 }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
-                <ChartLine className="w-4 h-4 text-white" />
+      {/* Modern Footer */}
+      <footer className="relative border-t border-white/10" style={{ zIndex: 2, backgroundColor: '#050505' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Brand Section */}
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                  <ChartLine className="w-6 h-6 text-black" />
+                </div>
+                <span className="text-2xl font-bold text-white">CryptoTracker</span>
               </div>
-              <span className="text-xl font-bold text-white">CryptoTracker</span>
+              <p className="text-white/70 text-lg leading-relaxed max-w-md">
+                The ultimate cryptocurrency portfolio tracking and trading platform. 
+                Start your journey to financial freedom with simulated trading and real-time analytics.
+              </p>
+              <div className="flex space-x-4 mt-6">
+                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
+                  <span className="text-white">𝕏</span>
+                </div>
+                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
+                  <span className="text-white">▶</span>
+                </div>
+                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
+                  <span className="text-white">in</span>
+                </div>
+              </div>
             </div>
-            <p className="text-white/80">
-              © 2025 CryptoTracker. All rights reserved.
+
+            {/* Product */}
+            <div>
+              <h3 className="text-white font-semibold text-lg mb-4">Product</h3>
+              <ul className="space-y-3">
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Features</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Pricing</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">API</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Mobile App</a></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h3 className="text-white font-semibold text-lg mb-4">Company</h3>
+              <ul className="space-y-3">
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">About</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Blog</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Careers</a></li>
+                <li><a href="#" className="text-white/70 hover:text-white transition-colors">Contact</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-white/60 text-sm">
+              © 2025 CryptoTracker. All rights reserved. Built with ❤️ for crypto enthusiasts.
             </p>
+            <div className="flex space-x-6 mt-4 md:mt-0">
+              <a href="#" className="text-white/60 hover:text-white text-sm transition-colors">Privacy Policy</a>
+              <a href="#" className="text-white/60 hover:text-white text-sm transition-colors">Terms of Service</a>
+              <a href="#" className="text-white/60 hover:text-white text-sm transition-colors">Cookie Policy</a>
+            </div>
           </div>
         </div>
       </footer>
