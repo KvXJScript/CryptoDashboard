@@ -171,16 +171,16 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      <footer className="bg-gray-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-3 mb-4">
               <div className="w-8 h-8 bg-gradient-to-r from-crypto-primary to-crypto-success rounded-lg flex items-center justify-center">
                 <ChartLine className="w-4 h-4 text-white" />
               </div>
-              <span className="text-xl font-bold">CryptoTracker</span>
+              <span className="text-xl font-bold text-white">CryptoTracker</span>
             </div>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-white">
               © 2025 CryptoTracker. All rights reserved.
             </p>
           </div>

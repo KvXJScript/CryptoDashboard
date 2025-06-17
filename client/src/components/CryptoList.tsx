@@ -109,9 +109,11 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
                   size="lg"
                   className="ring-2 ring-border/20"
                 />
-                <div>
-                  <p className="font-medium text-foreground">{crypto.name}</p>
-                  <p className="text-sm text-muted-foreground">{crypto.symbol}</p>
+                <div className="flex items-center space-x-3">
+                  <div>
+                    <p className="font-medium text-foreground">{crypto.name}</p>
+                    <p className="text-sm text-muted-foreground uppercase">{crypto.symbol}</p>
+                  </div>
                 </div>
               </div>
               <div className="text-right">
