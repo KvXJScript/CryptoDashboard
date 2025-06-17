@@ -364,6 +364,14 @@ export default function WatchlistPage() {
                         <p className="text-xs text-muted-foreground">{crypto.symbol}</p>
                       </div>
                     </div>
+                    <div className="text-right mr-4">
+                      <p className="font-medium text-foreground">${crypto.price.toFixed(4)}</p>
+                      <p className={`text-xs font-medium ${
+                        crypto.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
+                      }`}>
+                        {crypto.change24h >= 0 ? "+" : ""}{crypto.change24h.toFixed(2)}%
+                      </p>
+                    </div>
                     <Plus className="w-4 h-4 text-crypto-primary" />
                   </div>
                 ))}

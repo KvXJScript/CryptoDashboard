@@ -8,8 +8,10 @@ import RecentTransactions from "@/components/RecentTransactions";
 import CryptoIcon from "@/components/CryptoIcon";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { TrendingUp, TrendingDown, ArrowUp, ArrowDown, DollarSign, Wallet } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { TrendingUp, TrendingDown, ArrowUp, ArrowDown, DollarSign, Wallet, Plus, X, Search } from "lucide-react";
 
 interface PortfolioData {
   totalValue: number;
@@ -78,9 +80,52 @@ const getCryptoName = (symbol: string) => {
 export default function Portfolio() {
   const { isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: portfolio, isLoading: portfolioLoading } = useQuery<PortfolioData>({
     queryKey: ["/api/portfolio"],
+  });
+
+  const { data: cryptos } = useQuery<CryptoPrice[]>({
+    queryKey: ["/api/crypto/prices"],
+    refetchInterval: 30000,
+  });
+
+  interface CryptoPrice {
+    symbol: string;
+    name: string;
+    price: number;
+    change24h: number;
+    coinGeckoId: string;
+  }
+
+  const tradeMutation = useMutation({
+    mutationFn: async ({ symbol, type, amount }: { symbol: string; type: "buy" | "sell"; amount: number }) => {
+      await apiRequest("POST", "/api/trade", {
+        symbol,
+        type,
+        amount: amount.toString(),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/portfolio"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      toast({
+        title: "Trade Successful",
+        description: "Your trade has been executed successfully",
+      });
+      setShowAddModal(false);
+      setSearchTerm("");
+    },
+    onError: () => {
+      toast({
+        title: "Trade Failed",
+        description: "There was an error executing your trade",
+        variant: "destructive",
+      });
+    },
   });
 
   if (isLoading || portfolioLoading) {
@@ -218,7 +263,13 @@ export default function Portfolio() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-foreground">Holdings</h2>
-                  <Button variant="outline" size="sm" className="text-crypto-primary border-crypto-primary">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-crypto-primary border-crypto-primary"
+                    onClick={() => setShowAddModal(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
                     Add Position
                   </Button>
                 </div>
@@ -302,6 +353,80 @@ export default function Portfolio() {
           </div>
         </motion.div>
       </div>
+
+      {/* Add Position Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md glass-card border-border/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-foreground">Add Position</h3>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setShowAddModal(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search cryptocurrencies..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-muted/50 border-border/40"
+                />
+              </div>
+
+              <div className="max-h-64 overflow-y-auto custom-scrollbar space-y-2">
+                {cryptos?.filter(crypto => 
+                  crypto.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  crypto.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+                ).slice(0, 10).map((crypto) => (
+                  <div
+                    key={crypto.symbol}
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors cursor-pointer"
+                    onClick={() => {
+                      tradeMutation.mutate({ symbol: crypto.symbol, type: "buy", amount: 10 });
+                    }}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <CryptoIcon 
+                        coinId={crypto.coinGeckoId}
+                        symbol={crypto.symbol}
+                        size="sm"
+                        className="ring-1 ring-border/20"
+                      />
+                      <div>
+                        <p className="font-medium text-foreground">{crypto.name}</p>
+                        <p className="text-xs text-muted-foreground">{crypto.symbol}</p>
+                      </div>
+                    </div>
+                    <div className="text-right mr-4">
+                      <p className="font-medium text-foreground">${crypto.price.toFixed(4)}</p>
+                      <p className={`text-xs font-medium ${
+                        crypto.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
+                      }`}>
+                        {crypto.change24h >= 0 ? "+" : ""}{crypto.change24h.toFixed(2)}%
+                      </p>
+                    </div>
+                    <Plus className="w-4 h-4 text-crypto-primary" />
+                  </div>
+                ))}
+                {cryptos?.filter(crypto => 
+                  crypto.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  crypto.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+                ).length === 0 && searchTerm && (
+                  <p className="text-center text-muted-foreground py-4">No cryptocurrencies found</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </motion.div>
   );
 }
