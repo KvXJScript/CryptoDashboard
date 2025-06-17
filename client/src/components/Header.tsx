@@ -19,6 +19,7 @@ export default function Header() {
     { href: "/portfolio", label: "Portfolio", active: location === "/portfolio" },
     { href: "/trade", label: "Trade", active: location === "/trade" },
     { href: "/watchlist", label: "Watchlist", active: location === "/watchlist" },
+    { href: "/faq", label: "FAQ", active: location === "/faq" },
   ];
 
   return (

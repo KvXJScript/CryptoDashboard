@@ -151,7 +151,12 @@ export default function Portfolio() {
         </div>
 
         {/* Portfolio Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
           <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -199,10 +204,15 @@ export default function Portfolio() {
               </p>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
         {/* Holdings Table */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <motion.div 
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
           <div className="lg:col-span-2">
             <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
               <CardContent className="p-6">
@@ -222,8 +232,14 @@ export default function Portfolio() {
                   <div className="space-y-4">
                     {portfolio.holdings
                       .filter(holding => parseFloat(holding.amount) > 0)
-                      .map((holding) => (
-                      <div key={holding.symbol} className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/30 transition-colors border border-border/10">
+                      .map((holding, index) => (
+                      <motion.div 
+                        key={holding.symbol} 
+                        className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/30 transition-colors border border-border/10"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                      >
                         <div className="flex items-center space-x-4 flex-1">
                           <CryptoIcon 
                             coinId={getCoinGeckoId(holding.symbol)}
@@ -256,8 +272,8 @@ export default function Portfolio() {
                         <div className="text-right flex-shrink-0 min-w-[100px]">
                           <p className={`font-semibold flex items-center justify-end text-sm px-2 py-1 rounded-full ${
                             holding.change24h >= 0 
-                              ? "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/20" 
-                              : "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20"
+                              ? "text-crypto-success bg-crypto-success/10" 
+                              : "text-crypto-danger bg-crypto-danger/10"
                           }`}>
                             {holding.change24h >= 0 ? (
                               <ArrowUp className="w-3 h-3 mr-1" />
@@ -269,10 +285,10 @@ export default function Portfolio() {
                           <p className={`text-sm ${
                             holding.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
                           }`}>
-                            {formatCurrency((holding.value * holding.change24h) / 100)}
+                            {holding.change24h >= 0 ? "+" : ""}{formatCurrency(Math.abs((holding.value * holding.change24h) / 100))}
                           </p>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 )}
@@ -284,7 +300,7 @@ export default function Portfolio() {
             <PortfolioDistribution />
             <RecentTransactions />
           </div>
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );

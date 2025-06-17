@@ -114,7 +114,12 @@ export default function Trade() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
           <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -162,9 +167,14 @@ export default function Trade() {
               )}
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <motion.div 
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
           {/* Main Trading Interface */}
           <div className="lg:col-span-2">
             <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
