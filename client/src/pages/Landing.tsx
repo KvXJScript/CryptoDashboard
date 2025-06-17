@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChartLine, Shield, Zap, TrendingUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-// Particle animation component
+// Enhanced floating particle background
 function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -24,17 +24,22 @@ function ParticleBackground() {
       vy: number;
       size: number;
       opacity: number;
+      color: string;
+      pulse: number;
     }> = [];
 
-    // Create particles
-    for (let i = 0; i < 50; i++) {
+    // Create enhanced particles with different colors and behaviors
+    for (let i = 0; i < 120; i++) {
+      const colors = ['rgba(0, 255, 136, ', 'rgba(100, 255, 218, ', 'rgba(138, 43, 226, ', 'rgba(255, 255, 255, '];
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 2 + 1,
-        opacity: Math.random() * 0.5 + 0.2,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: (Math.random() - 0.5) * 1.2 - 0.3, // Slightly upward drift
+        size: Math.random() * 3 + 0.5,
+        opacity: Math.random() * 0.6 + 0.2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        pulse: Math.random() * Math.PI * 2,
       });
     }
 
@@ -43,33 +48,52 @@ function ParticleBackground() {
       
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach((particle) => {
+      particles.forEach((particle, index) => {
+        // Update position
         particle.x += particle.vx;
         particle.y += particle.vy;
+        particle.pulse += 0.02;
 
-        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
-        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
+        // Wrap around screen edges
+        if (particle.x < -10) particle.x = canvas.width + 10;
+        if (particle.x > canvas.width + 10) particle.x = -10;
+        if (particle.y < -10) particle.y = canvas.height + 10;
+        if (particle.y > canvas.height + 10) particle.y = -10;
 
+        // Pulsing effect
+        const pulseSize = particle.size + Math.sin(particle.pulse) * 0.5;
+        const pulseOpacity = particle.opacity + Math.sin(particle.pulse * 1.5) * 0.2;
+
+        // Draw particle with glow
+        ctx.save();
+        ctx.globalAlpha = pulseOpacity;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = particle.color + '0.8)';
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(2, 0, 59, ${particle.opacity})`;
+        ctx.arc(particle.x, particle.y, pulseSize, 0, Math.PI * 2);
+        ctx.fillStyle = particle.color + pulseOpacity + ')';
         ctx.fill();
+        ctx.restore();
       });
 
-      // Draw connections
+      // Draw dynamic connections between nearby particles
       particles.forEach((particle, i) => {
-        particles.slice(i + 1).forEach((otherParticle) => {
+        particles.slice(i + 1, i + 6).forEach((otherParticle) => {
           const dx = particle.x - otherParticle.x;
           const dy = particle.y - otherParticle.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 100) {
+          if (distance < 150) {
+            const opacity = (1 - distance / 150) * 0.15;
+            ctx.save();
+            ctx.globalAlpha = opacity;
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.strokeStyle = `rgba(138, 43, 226, ${0.15 * (1 - distance / 100)})`;
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+            ctx.lineWidth = 0.8;
             ctx.stroke();
+            ctx.restore();
           }
         });
       });
@@ -146,11 +170,8 @@ function AnimatedLineChart() {
     const chartWidth = canvas.offsetWidth - padding * 2;
     const chartHeight = canvas.offsetHeight - padding * 2;
 
-    // Clear canvas with gradient background
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight);
-    gradient.addColorStop(0, '#000000');
-    gradient.addColorStop(1, '#0a0a0a');
-    ctx.fillStyle = gradient;
+    // Clear canvas with solid dark background
+    ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
 
     // Calculate min/max values first
@@ -172,9 +193,9 @@ function AnimatedLineChart() {
       ctx.lineTo(canvas.offsetWidth - padding, y);
       ctx.stroke();
       
-      // Add price labels
+      // Add price labels with better positioning to avoid overlap
       const priceValue = maxValue - (i * valueRange / 4);
-      ctx.fillText(`$${priceValue.toLocaleString()}`, 5, y + 4);
+      ctx.fillText(`$${priceValue.toLocaleString()}`, 8, y - 8);
     }
     
     // Draw vertical grid lines (time)
@@ -189,14 +210,8 @@ function AnimatedLineChart() {
       ctx.fillText(data[i].time, x - 15, canvas.offsetHeight - 10);
     }
 
-    // Create gradient for the line
-    const lineGradient = ctx.createLinearGradient(0, 0, canvas.offsetWidth, 0);
-    lineGradient.addColorStop(0, '#8a2be2');
-    lineGradient.addColorStop(0.5, '#00ff88');
-    lineGradient.addColorStop(1, '#ff6b6b');
-    
-    // Draw animated line with full connection
-    ctx.strokeStyle = lineGradient;
+    // Use solid green color for the line
+    ctx.strokeStyle = '#00ff88';
     ctx.lineWidth = 3;
     ctx.beginPath();
 
@@ -341,10 +356,10 @@ function AnimatedLineChart() {
             <button
               key={period}
               onClick={() => setTimeframe(period)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
                 timeframe === period
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg animate-pulse-glow'
-                  : 'bg-gray-700/60 text-gray-300 hover:bg-gray-600/80 backdrop-blur-sm'
+                  ? 'bg-green-500 text-black shadow-lg animate-pulse border-2 border-green-400'
+                  : 'bg-gray-800/80 text-gray-300 hover:bg-gray-700/90 border border-gray-600 backdrop-blur-sm'
               }`}
             >
               {period}
@@ -369,10 +384,10 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #02003b 0%, #1a0d4a 25%, #2d1b69 50%, #8a2be2 75%, #02003b 100%)' }}>
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#0a0a0a' }}>
       <ParticleBackground />
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-lg border-b border-white/10 animate-fade-in" style={{ zIndex: 10, backgroundColor: 'rgba(2, 0, 59, 0.4)' }}>
+      <header className="sticky top-0 z-50 backdrop-blur-lg border-b border-white/10 animate-fade-in" style={{ zIndex: 10, backgroundColor: 'rgba(10, 10, 10, 0.9)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
@@ -397,7 +412,7 @@ export default function Landing() {
         <div className="text-center">
           <h1 className="text-5xl font-bold text-white mb-6 leading-tight animate-fade-in">
             Track, Trade, and
-            <span className="text-white animate-pulse-glow">
+            <span className="text-green-400">
               {" "}Grow{" "}
             </span>
             Your Crypto Portfolio
