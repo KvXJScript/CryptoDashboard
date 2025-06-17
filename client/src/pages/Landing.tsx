@@ -325,10 +325,10 @@ function AnimatedLineChart() {
   }, [timeframe]);
 
   return (
-    <div className="bg-black rounded-2xl p-6 border-2 border-gray-700 shadow-2xl">
+    <div className="bg-black rounded-2xl p-6 border-2 border-purple-500/30 shadow-2xl glass-modern">
       {/* Chart Controls */}
       <div className="flex justify-between items-center mb-4">
-        <div className="bg-gray-800 border border-gray-600 rounded-lg p-2 shadow-lg">
+        <div className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 border border-purple-400/30 rounded-lg p-3 shadow-lg backdrop-blur-sm">
           <div className="text-2xl font-bold text-white">$24,891.45</div>
           <div className="text-green-400 flex items-center text-sm">
             <TrendingUp className="w-4 h-4 mr-1" />
@@ -343,8 +343,8 @@ function AnimatedLineChart() {
               onClick={() => setTimeframe(period)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 timeframe === period
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg animate-pulse-glow'
+                  : 'bg-gray-700/60 text-gray-300 hover:bg-gray-600/80 backdrop-blur-sm'
               }`}
             >
               {period}
@@ -356,7 +356,7 @@ function AnimatedLineChart() {
       {/* Chart Canvas */}
       <canvas
         ref={canvasRef}
-        className="w-full h-64 rounded-lg"
+        className="w-full h-64 rounded-lg border border-gray-700/50"
         style={{ display: 'block' }}
       />
     </div>
@@ -490,19 +490,19 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="backdrop-blur-sm relative" style={{ zIndex: 2, backgroundColor: 'rgba(8, 4, 128, 0.6)' }}>
+      <section className="backdrop-blur-sm relative animate-fade-in" style={{ zIndex: 2, backgroundColor: 'rgba(2, 0, 59, 0.8)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-3xl font-bold text-white mb-4 animate-slide-up">
               Ready to start your crypto journey?
             </h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto animate-slide-up animate-delay-200">
               Join thousands of users who trust CryptoTracker for their portfolio management needs.
             </p>
             <Button
               size="lg"
               onClick={handleLogin}
-              className="bg-white/20 hover:bg-white/30 text-white border border-white/30 px-8 py-3 text-lg font-semibold backdrop-blur-sm"
+              className="bg-gradient-to-r from-purple-600/30 to-pink-600/30 hover:from-purple-600/50 hover:to-pink-600/50 text-white border border-white/30 px-8 py-3 text-lg font-semibold backdrop-blur-sm animate-pulse-glow animate-delay-400 transition-all duration-300 transform hover:scale-105"
             >
               Get Started Now
             </Button>
