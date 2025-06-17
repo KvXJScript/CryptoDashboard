@@ -52,7 +52,7 @@ function ParticleBackground() {
 
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(8, 4, 128, ${particle.opacity})`;
+        ctx.fillStyle = `rgba(2, 0, 59, ${particle.opacity})`;
         ctx.fill();
       });
 
@@ -67,7 +67,7 @@ function ParticleBackground() {
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.strokeStyle = `rgba(8, 4, 128, ${0.1 * (1 - distance / 100)})`;
+            ctx.strokeStyle = `rgba(138, 43, 226, ${0.15 * (1 - distance / 100)})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
@@ -146,35 +146,64 @@ function AnimatedLineChart() {
     const chartWidth = canvas.offsetWidth - padding * 2;
     const chartHeight = canvas.offsetHeight - padding * 2;
 
-    // Clear canvas
-    ctx.fillStyle = '#000000';
+    // Clear canvas with gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight);
+    gradient.addColorStop(0, '#000000');
+    gradient.addColorStop(1, '#0a0a0a');
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
 
-    // Draw grid
+    // Calculate min/max values first
+    const values = data.map(d => d.value);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const valueRange = maxValue - minValue;
+
+    // Draw horizontal grid lines (price levels)
     ctx.strokeStyle = '#333333';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 0.5;
+    ctx.fillStyle = '#888888';
+    ctx.font = '12px Inter, sans-serif';
+    
     for (let i = 0; i <= 4; i++) {
       const y = padding + (chartHeight / 4) * i;
       ctx.beginPath();
       ctx.moveTo(padding, y);
       ctx.lineTo(canvas.offsetWidth - padding, y);
       ctx.stroke();
+      
+      // Add price labels
+      const priceValue = maxValue - (i * valueRange / 4);
+      ctx.fillText(`$${priceValue.toLocaleString()}`, 5, y + 4);
+    }
+    
+    // Draw vertical grid lines (time)
+    for (let i = 0; i < data.length; i++) {
+      const x = padding + (chartWidth / (data.length - 1)) * i;
+      ctx.beginPath();
+      ctx.moveTo(x, padding);
+      ctx.lineTo(x, padding + chartHeight);
+      ctx.stroke();
+      
+      // Add time labels
+      ctx.fillText(data[i].time, x - 15, canvas.offsetHeight - 10);
     }
 
-    // Calculate min/max values
-    const values = data.map(d => d.value);
-    const minValue = Math.min(...values);
-    const maxValue = Math.max(...values);
-    const valueRange = maxValue - minValue;
-
-    // Draw animated line
-    ctx.strokeStyle = '#00ff88';
+    // Create gradient for the line
+    const lineGradient = ctx.createLinearGradient(0, 0, canvas.offsetWidth, 0);
+    lineGradient.addColorStop(0, '#8a2be2');
+    lineGradient.addColorStop(0.5, '#00ff88');
+    lineGradient.addColorStop(1, '#ff6b6b');
+    
+    // Draw animated line with full connection
+    ctx.strokeStyle = lineGradient;
     ctx.lineWidth = 3;
     ctx.beginPath();
 
     const animatedLength = Math.floor(data.length * animationProgress);
     const partialProgress = (data.length * animationProgress) % 1;
 
+    // Draw all points up to animated length
     for (let i = 0; i <= animatedLength && i < data.length; i++) {
       const x = padding + (chartWidth / (data.length - 1)) * i;
       const normalizedValue = (data[i].value - minValue) / valueRange;
@@ -185,14 +214,6 @@ function AnimatedLineChart() {
       } else {
         ctx.lineTo(x, y);
       }
-
-      // Draw points
-      ctx.save();
-      ctx.fillStyle = '#00ff88';
-      ctx.beginPath();
-      ctx.arc(x, y, 4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
     }
 
     // Draw partial line for smooth animation
@@ -216,8 +237,69 @@ function AnimatedLineChart() {
 
     // Draw glow effect
     ctx.shadowColor = '#00ff88';
-    ctx.shadowBlur = 20;
+    ctx.shadowBlur = 15;
     ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Draw points with hover effect
+    for (let i = 0; i <= animatedLength && i < data.length; i++) {
+      const x = padding + (chartWidth / (data.length - 1)) * i;
+      const normalizedValue = (data[i].value - minValue) / valueRange;
+      const y = padding + chartHeight - (normalizedValue * chartHeight);
+
+      // Outer glow
+      ctx.save();
+      ctx.fillStyle = '#00ff88';
+      ctx.shadowColor = '#00ff88';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Inner point
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Fill area under the curve
+    if (animatedLength > 0) {
+      const areaGradient = ctx.createLinearGradient(0, padding, 0, padding + chartHeight);
+      areaGradient.addColorStop(0, 'rgba(0, 255, 136, 0.3)');
+      areaGradient.addColorStop(1, 'rgba(0, 255, 136, 0.05)');
+      
+      ctx.fillStyle = areaGradient;
+      ctx.beginPath();
+      
+      // Start from bottom left
+      const firstX = padding;
+      ctx.moveTo(firstX, padding + chartHeight);
+      
+      // Draw to first point
+      const firstY = padding + chartHeight - ((data[0].value - minValue) / valueRange * chartHeight);
+      ctx.lineTo(firstX, firstY);
+      
+      // Follow the line
+      for (let i = 1; i <= animatedLength && i < data.length; i++) {
+        const x = padding + (chartWidth / (data.length - 1)) * i;
+        const normalizedValue = (data[i].value - minValue) / valueRange;
+        const y = padding + chartHeight - (normalizedValue * chartHeight);
+        ctx.lineTo(x, y);
+      }
+      
+      // Close the path to bottom
+      if (animatedLength > 0) {
+        const lastX = padding + (chartWidth / (data.length - 1)) * Math.min(animatedLength, data.length - 1);
+        ctx.lineTo(lastX, padding + chartHeight);
+      }
+      
+      ctx.closePath();
+      ctx.fill();
+    }
     
   }, [timeframe, animationProgress]);
 
@@ -287,10 +369,10 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #080480 0%, #0a0690 50%, #080480 100%)' }}>
+    <div className="min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #02003b 0%, #1a0d4a 25%, #2d1b69 50%, #8a2be2 75%, #02003b 100%)' }}>
       <ParticleBackground />
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-lg border-b border-white/10" style={{ zIndex: 10, backgroundColor: 'rgba(8, 4, 128, 0.3)' }}>
+      <header className="sticky top-0 z-50 backdrop-blur-lg border-b border-white/10 animate-fade-in" style={{ zIndex: 10, backgroundColor: 'rgba(2, 0, 59, 0.4)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
@@ -313,22 +395,22 @@ export default function Landing() {
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative" style={{ zIndex: 2 }}>
         <div className="text-center">
-          <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-5xl font-bold text-white mb-6 leading-tight animate-fade-in">
             Track, Trade, and
-            <span className="text-white">
+            <span className="text-white animate-pulse-glow">
               {" "}Grow{" "}
             </span>
             Your Crypto Portfolio
           </h1>
-          <p className="text-xl text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed animate-slide-up animate-delay-200">
             A modern cryptocurrency portfolio tracking platform with simulated trading, 
             live price data, and professional-grade analytics. Start your crypto journey today.
           </p>
-          <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+          <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center animate-slide-up animate-delay-400">
             <Button
               size="lg"
               onClick={handleLogin}
-              className="bg-white/20 hover:bg-white/30 text-white border border-white/30 px-8 py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+              className="bg-white/20 hover:bg-white/30 text-white border border-white/30 px-8 py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-sm animate-pulse-glow"
             >
               Get Started Free
             </Button>
@@ -343,14 +425,14 @@ export default function Landing() {
         </div>
 
         {/* Hero Chart Section */}
-        <div className="mt-16 relative">
+        <div className="mt-16 relative animate-scale-in animate-delay-600">
           <AnimatedLineChart />
         </div>
       </section>
 
       {/* Features Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative" style={{ zIndex: 2 }}>
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-3xl font-bold text-white mb-4">
             Everything you need to manage your crypto portfolio
           </h2>
@@ -361,9 +443,9 @@ export default function Landing() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Feature 1 */}
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <Card className="glass-modern hover:scale-105 transition-all duration-300 animate-slide-in-left animate-delay-200">
             <CardContent className="p-6">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-lg flex items-center justify-center mb-4 animate-bounce-subtle">
                 <ChartLine className="w-6 h-6 text-blue-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">
@@ -376,9 +458,9 @@ export default function Landing() {
           </Card>
 
           {/* Feature 2 */}
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <Card className="glass-modern hover:scale-105 transition-all duration-300 animate-slide-up animate-delay-300">
             <CardContent className="p-6">
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500/30 to-emerald-500/30 rounded-lg flex items-center justify-center mb-4 animate-bounce-subtle animate-delay-100">
                 <Zap className="w-6 h-6 text-green-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">
@@ -391,9 +473,9 @@ export default function Landing() {
           </Card>
 
           {/* Feature 3 */}
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <Card className="glass-modern hover:scale-105 transition-all duration-300 animate-slide-in-right animate-delay-400">
             <CardContent className="p-6">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-lg flex items-center justify-center mb-4 animate-bounce-subtle animate-delay-200">
                 <Shield className="w-6 h-6 text-purple-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">
