@@ -39,7 +39,6 @@ function Router() {
           <Route path="/trade" component={Trade} />
           <Route path="/watchlist" component={WatchlistPage} />
           <Route path="/faq" component={FAQ} />
-          <Route component={NotFound} />
         </>
       )}
     </Switch>

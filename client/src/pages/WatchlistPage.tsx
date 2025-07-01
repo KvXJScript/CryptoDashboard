@@ -41,6 +41,21 @@ export default function WatchlistPage() {
     refetchInterval: 30000,
   });
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return "text-green-400"; // Bright green for positive
+    if (change < 0) return "text-red-400"; // Light red for negative
+    return "text-gray-400"; // Neutral for zero
+  };
+
   const addToWatchlistMutation = useMutation({
     mutationFn: async (symbol: string) => {
       await apiRequest("POST", "/api/watchlist", { symbol });
@@ -235,9 +250,7 @@ export default function WatchlistPage() {
                         <div className="flex items-center space-x-4">
                           <div className="text-right">
                             <p className="font-semibold text-foreground">{formatPrice(item.price)}</p>
-                            <p className={`text-sm font-medium flex items-center justify-end ${
-                              item.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
-                            }`}>
+                            <p className={`text-sm font-medium flex items-center justify-end ${getChangeColor(item.change24h)}`}>
                               {item.change24h >= 0 ? (
                                 <ArrowUp className="w-3 h-3 mr-1" />
                               ) : (
@@ -250,7 +263,7 @@ export default function WatchlistPage() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-crypto-danger"
+                            className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-400"
                             onClick={() => removeFromWatchlistMutation.mutate(item.symbol)}
                             disabled={removeFromWatchlistMutation.isPending}
                           >
@@ -277,9 +290,7 @@ export default function WatchlistPage() {
                         <p className="font-medium text-foreground">{crypto.symbol}</p>
                         <p className="text-xs text-muted-foreground">{formatPrice(crypto.price)}</p>
                       </div>
-                      <p className={`font-medium ${
-                        crypto.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
-                      }`}>
+                      <p className={`font-medium ${getChangeColor(crypto.change24h)}`}>
                         {formatPercent(crypto.change24h)}
                       </p>
                     </div>
@@ -299,13 +310,13 @@ export default function WatchlistPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Gainers</span>
-                      <span className="font-semibold text-crypto-success">
+                      <span className="font-semibold text-green-400">
                         {watchlist.filter(item => item.change24h > 0).length}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Losers</span>
-                      <span className="font-semibold text-crypto-danger">
+                      <span className="font-semibold text-red-400">
                         {watchlist.filter(item => item.change24h < 0).length}
                       </span>
                     </div>
@@ -366,9 +377,7 @@ export default function WatchlistPage() {
                     </div>
                     <div className="text-right mr-4">
                       <p className="font-medium text-foreground">${crypto.price.toFixed(4)}</p>
-                      <p className={`text-xs font-medium ${
-                        crypto.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
-                      }`}>
+                      <p className={`text-xs font-medium ${getChangeColor(crypto.change24h)}`}>
                         {crypto.change24h >= 0 ? "+" : ""}{crypto.change24h.toFixed(2)}%
                       </p>
                     </div>

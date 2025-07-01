@@ -92,7 +92,15 @@ export default function Trade() {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(value);
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return "text-green-400"; // Bright green for positive
+    if (change < 0) return "text-red-400"; // Light red for negative
+    return "text-gray-400"; // Neutral for zero
   };
 
   const topGainers = cryptos?.filter(c => c.change24h > 0).sort((a, b) => b.change24h - a.change24h).slice(0, 3) || [];
@@ -138,12 +146,12 @@ export default function Trade() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium text-muted-foreground">Top Gainer</h3>
-                <TrendingUp className="w-5 h-5 text-crypto-success" />
+                <TrendingUp className="w-5 h-5 text-green-400" />
               </div>
               {topGainers[0] ? (
                 <div>
                   <p className="text-lg font-bold text-foreground">{topGainers[0].symbol}</p>
-                  <p className="text-sm text-crypto-success">+{topGainers[0].change24h.toFixed(2)}%</p>
+                  <p className={`text-sm ${getChangeColor(topGainers[0].change24h)}`}>+{topGainers[0].change24h.toFixed(2)}%</p>
                 </div>
               ) : (
                 <p className="text-muted-foreground">No data</p>
@@ -155,12 +163,12 @@ export default function Trade() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium text-muted-foreground">Top Loser</h3>
-                <TrendingDown className="w-5 h-5 text-crypto-danger" />
+                <TrendingDown className="w-5 h-5 text-red-400" />
               </div>
               {topLosers[0] ? (
                 <div>
                   <p className="text-lg font-bold text-foreground">{topLosers[0].symbol}</p>
-                  <p className="text-sm text-crypto-danger">{topLosers[0].change24h.toFixed(2)}%</p>
+                  <p className={`text-sm ${getChangeColor(topLosers[0].change24h)}`}>{topLosers[0].change24h.toFixed(2)}%</p>
                 </div>
               ) : (
                 <p className="text-muted-foreground">No data</p>
@@ -231,17 +239,15 @@ export default function Trade() {
                           <p className="font-semibold text-foreground">
                             {formatCurrency(crypto.price)}
                           </p>
-                          <p className={`text-sm font-medium ${
-                            crypto.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
-                          }`}>
+                          <p className={`text-sm font-medium ${getChangeColor(crypto.change24h)}`}>
                             {crypto.change24h >= 0 ? "+" : ""}{crypto.change24h.toFixed(2)}%
                           </p>
                         </div>
 
-                        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center space-x-2">
                           <Button
                             size="sm"
-                            className="px-4 py-2 text-xs bg-crypto-success text-white rounded-lg hover:bg-crypto-success/80 transition-colors"
+                            className="px-4 py-2 text-xs bg-green-400 text-white rounded-lg hover:bg-green-500 transition-colors"
                             onClick={() => handleTrade(crypto, "buy")}
                           >
                             Buy
@@ -249,7 +255,7 @@ export default function Trade() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            className="px-4 py-2 text-xs bg-crypto-danger text-white rounded-lg hover:bg-crypto-danger/80 transition-colors"
+                            className="px-4 py-2 text-xs bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors"
                             onClick={() => handleTrade(crypto, "sell")}
                           >
                             Sell
@@ -275,7 +281,7 @@ export default function Trade() {
                         <p className="font-medium text-foreground">{crypto.symbol}</p>
                         <p className="text-xs text-muted-foreground">{formatCurrency(crypto.price)}</p>
                       </div>
-                      <p className="text-crypto-success font-medium">
+                      <p className={`font-medium ${getChangeColor(crypto.change24h)}`}>
                         +{crypto.change24h.toFixed(2)}%
                       </p>
                     </div>
@@ -294,7 +300,7 @@ export default function Trade() {
                         <p className="font-medium text-foreground">{crypto.symbol}</p>
                         <p className="text-xs text-muted-foreground">{formatCurrency(crypto.price)}</p>
                       </div>
-                      <p className="text-crypto-danger font-medium">
+                      <p className={`font-medium ${getChangeColor(crypto.change24h)}`}>
                         {crypto.change24h.toFixed(2)}%
                       </p>
                     </div>

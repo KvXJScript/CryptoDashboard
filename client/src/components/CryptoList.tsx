@@ -135,10 +135,10 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
                   <span>{formatPercent(crypto.change24h)}</span>
                 </p>
               </div>
-              <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center space-x-2">
                 <Button
                   size="sm"
-                  className="px-3 py-1 text-xs bg-crypto-success text-white rounded-full hover:bg-crypto-success/80 transition-colors"
+                  className="px-3 py-1 text-xs bg-green-400 text-white rounded-full hover:bg-green-500 transition-colors"
                   onClick={() => onTrade(crypto, "buy")}
                 >
                   Buy
@@ -146,7 +146,7 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
                 <Button
                   size="sm"
                   variant="destructive"
-                  className="px-3 py-1 text-xs bg-crypto-danger text-white rounded-full hover:bg-crypto-danger/80 transition-colors"
+                  className="px-3 py-1 text-xs bg-red-400 text-white rounded-full hover:bg-red-500 transition-colors"
                   onClick={() => onTrade(crypto, "sell")}
                 >
                   Sell
