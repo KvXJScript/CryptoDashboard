@@ -168,11 +168,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const holdings = await storage.getUserHoldings(userId);
-      const balance = await storage.getUserBalance(userId);
+      let balance = await storage.getUserBalance(userId);
+      
+      // Initialize balance if it doesn't exist
+      if (!balance) {
+        balance = await storage.initializeUserBalance(userId);
+      }
       
       // Get current prices for portfolio calculation
       const symbols = holdings.map(h => symbolToCoinGeckoId[h.symbol]).filter(Boolean);
-      let prices = {};
+      let prices: Record<string, any> = {};
       
       if (symbols.length > 0) {
         prices = await coinGecko.getCryptoPrices(symbols);
@@ -225,13 +230,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fee = total * 0.001; // 0.1% fee
       const totalWithFee = type === "buy" ? total + fee : total - fee;
 
-      // Get user balance
-      const balance = await storage.getUserBalance(userId);
+      // Get user balance and initialize if needed
+      let balance = await storage.getUserBalance(userId);
       if (!balance) {
-        return res.status(400).json({ message: "User balance not found" });
+        balance = await storage.initializeUserBalance(userId);
       }
 
-      const currentBalance = parseFloat(balance.balance);
+      const currentBalance = parseFloat(balance.balance || "0");
 
       if (type === "buy") {
         // Check if user has enough balance
@@ -313,7 +318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get prices for watchlist items
       const symbols = watchlistItems.map(item => symbolToCoinGeckoId[item.symbol]).filter(Boolean);
-      let prices = {};
+      let prices: Record<string, any> = {};
       
       if (symbols.length > 0) {
         prices = await coinGecko.getCryptoPrices(symbols);
