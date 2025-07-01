@@ -16,8 +16,7 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { isAuthenticated, isLoading, user, error } = useAuth();
 
-  // Debug authentication state
-  console.log('Auth State:', { isAuthenticated, isLoading, user, error });
+  // Authentication logic handles routing
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -31,10 +30,7 @@ function Router() {
   return (
     <Switch>
       {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route component={Landing} />
-        </>
+        <Route component={Landing} />
       ) : (
         <>
           <Route path="/" component={Dashboard} />
