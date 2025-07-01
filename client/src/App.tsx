@@ -14,7 +14,10 @@ import FAQ from "@/pages/FAQ";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user, error } = useAuth();
+
+  // Debug authentication state
+  console.log('Auth State:', { isAuthenticated, isLoading, user, error });
 
   // Show loading state while checking authentication
   if (isLoading) {
