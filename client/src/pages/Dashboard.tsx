@@ -28,20 +28,7 @@ export default function Dashboard() {
   const [selectedCrypto, setSelectedCrypto] = useState<CryptoPrice | null>(null);
   const [tradeType, setTradeType] = useState<"buy" | "sell">("buy");
 
-  // Redirect to home if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
+  // No redirect logic needed - router handles authentication
 
   const handleTrade = (crypto: CryptoPrice, type: "buy" | "sell") => {
     setSelectedCrypto(crypto);
@@ -76,9 +63,7 @@ export default function Dashboard() {
     );
   }
 
-  if (!isAuthenticated) {
-    return null; // Will redirect via useEffect
-  }
+  // Dashboard content (authentication is handled by router)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 text-foreground transition-all duration-500">
