@@ -24,7 +24,13 @@ export default function RecentTransactions() {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(num);
+  };
+
+  const getTransactionColor = (type: "buy" | "sell") => {
+    return type === "buy" ? "text-green-400" : "text-red-400";
   };
 
   const formatAmount = (amount: string, symbol: string) => {
@@ -94,14 +100,14 @@ export default function RecentTransactions() {
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center ${
                     transaction.type === "buy"
-                      ? "bg-crypto-success/20"
-                      : "bg-crypto-danger/20"
+                      ? "bg-green-400/20"
+                      : "bg-red-400/20"
                   }`}
                 >
                   {transaction.type === "buy" ? (
-                    <ArrowUp className="text-crypto-success text-xs w-4 h-4" />
+                    <ArrowUp className="text-green-400 text-xs w-4 h-4" />
                   ) : (
-                    <ArrowDown className="text-crypto-danger text-xs w-4 h-4" />
+                    <ArrowDown className="text-red-400 text-xs w-4 h-4" />
                   )}
                 </div>
                 <div>
@@ -116,9 +122,7 @@ export default function RecentTransactions() {
                 </div>
               </div>
               <div className="text-right">
-                <p className={`text-sm font-medium ${
-                  transaction.type === "buy" ? "text-crypto-success" : "text-crypto-danger"
-                }`}>
+                <p className={`text-sm font-medium ${getTransactionColor(transaction.type)}`}>
                   {transaction.type === "buy" ? "+" : "-"}
                   {formatAmount(transaction.amount, transaction.symbol)}
                 </p>

@@ -92,6 +92,8 @@ export default function TradingModal({ isOpen, onClose, crypto, tradeType }: Tra
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(value);
   };
 
@@ -172,7 +174,7 @@ export default function TradingModal({ isOpen, onClose, crypto, tradeType }: Tra
             <Button
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium ${
                 activeTradeType === "buy"
-                  ? "bg-crypto-success text-white"
+                  ? "bg-green-400 text-white"
                   : "text-gray-500 hover:text-gray-700 bg-transparent"
               }`}
               onClick={() => setActiveTradeType("buy")}
@@ -182,7 +184,7 @@ export default function TradingModal({ isOpen, onClose, crypto, tradeType }: Tra
             <Button
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium ${
                 activeTradeType === "sell"
-                  ? "bg-crypto-danger text-white"
+                  ? "bg-red-400 text-white"
                   : "text-gray-500 hover:text-gray-700 bg-transparent"
               }`}
               onClick={() => setActiveTradeType("sell")}

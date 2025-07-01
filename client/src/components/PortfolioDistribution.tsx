@@ -24,9 +24,15 @@ export default function PortfolioDistribution() {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-      notation: "compact",
-      maximumFractionDigits: 1,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(value);
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return "text-green-400"; // Bright green for positive
+    if (change < 0) return "text-red-400"; // Light red for negative
+    return "text-gray-400"; // Neutral for zero
   };
 
   const getDistributionData = () => {

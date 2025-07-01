@@ -101,6 +101,21 @@ export default function Portfolio() {
     coinGeckoId: string;
   }
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return "text-green-400"; // Bright green for positive
+    if (change < 0) return "text-red-400"; // Light red for negative
+    return "text-gray-400"; // Neutral for zero
+  };
+
   const tradeMutation = useMutation({
     mutationFn: async ({ symbol, type, amount }: { symbol: string; type: "buy" | "sell"; amount: number }) => {
       await apiRequest("POST", "/api/trade", {
@@ -161,13 +176,6 @@ export default function Portfolio() {
     }, 500);
     return null;
   }
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value);
-  };
 
   const formatPercent = (value: number) => {
     return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
@@ -242,9 +250,9 @@ export default function Portfolio() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium text-muted-foreground">Today's P&L</h3>
-                <TrendingUp className={`w-5 h-5 ${todayPnL >= 0 ? "text-crypto-success" : "text-crypto-danger"}`} />
+                <TrendingUp className={`w-5 h-5 ${getChangeColor(todayPnL)}`} />
               </div>
-              <p className={`text-2xl font-bold ${todayPnL >= 0 ? "text-crypto-success" : "text-crypto-danger"}`}>
+              <p className={`text-2xl font-bold ${getChangeColor(todayPnL)}`}>
                 {todayPnL >= 0 ? "+" : ""}{formatCurrency(todayPnL)}
               </p>
             </CardContent>
@@ -300,13 +308,13 @@ export default function Portfolio() {
                           />
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-1">
-                              <p className="font-semibold text-foreground text-lg">{holding.symbol}</p>
-                              <span className="text-sm text-muted-foreground bg-muted/30 px-2 py-1 rounded">
-                                {parseFloat(holding.amount).toFixed(4)}
+                              <p className="font-semibold text-foreground text-lg">{getCryptoName(holding.symbol)}</p>
+                              <span className="text-sm text-muted-foreground font-mono font-semibold bg-muted/30 px-2 py-1 rounded">
+                                {parseFloat(holding.amount).toFixed(4)} {holding.symbol}
                               </span>
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              {getCryptoName(holding.symbol)}
+                              Current Price: {formatCurrency(holding.currentPrice)}
                             </p>
                           </div>
                         </div>
@@ -323,8 +331,8 @@ export default function Portfolio() {
                         <div className="text-right flex-shrink-0 min-w-[100px]">
                           <p className={`font-semibold flex items-center justify-end text-sm px-2 py-1 rounded-full ${
                             holding.change24h >= 0 
-                              ? "text-crypto-success bg-crypto-success/10" 
-                              : "text-crypto-danger bg-crypto-danger/10"
+                              ? "text-green-400 bg-green-400/10" 
+                              : "text-red-400 bg-red-400/10"
                           }`}>
                             {holding.change24h >= 0 ? (
                               <ArrowUp className="w-3 h-3 mr-1" />
@@ -333,9 +341,7 @@ export default function Portfolio() {
                             )}
                             {formatPercent(holding.change24h)}
                           </p>
-                          <p className={`text-sm ${
-                            holding.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
-                          }`}>
+                          <p className={`text-sm ${getChangeColor(holding.change24h)}`}>
                             {holding.change24h >= 0 ? "+" : ""}{formatCurrency(Math.abs((holding.value * holding.change24h) / 100))}
                           </p>
                         </div>

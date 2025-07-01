@@ -29,12 +29,18 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 2,
-      maximumFractionDigits: price < 1 ? 6 : 2,
+      maximumFractionDigits: 2,
     }).format(price);
   };
 
   const formatPercent = (change: number) => {
     return `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`;
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return "text-green-400"; // Bright green for positive
+    if (change < 0) return "text-red-400"; // Light red for negative
+    return "text-gray-400"; // Neutral for zero
   };
 
 
@@ -112,16 +118,14 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
                 <div className="flex items-center space-x-3">
                   <div>
                     <p className="font-medium text-foreground">{crypto.name}</p>
-                    <p className="text-sm text-muted-foreground uppercase">{crypto.symbol}</p>
+                    <p className="text-sm text-muted-foreground font-mono font-semibold">{crypto.symbol}</p>
                   </div>
                 </div>
               </div>
               <div className="text-right">
                 <p className="font-semibold text-foreground">{formatPrice(crypto.price)}</p>
                 <p
-                  className={`text-sm flex items-center justify-end font-medium ${
-                    crypto.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
-                  }`}
+                  className={`text-sm flex items-center justify-end font-medium ${getChangeColor(crypto.change24h)}`}
                 >
                   {crypto.change24h >= 0 ? (
                     <ArrowUp className="w-3 h-3 mr-1" />

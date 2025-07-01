@@ -47,7 +47,15 @@ export default function DashboardStats() {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(value);
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return "text-green-400"; // Bright green for positive
+    if (change < 0) return "text-red-400"; // Light red for negative
+    return "text-gray-400"; // Neutral for zero
   };
 
   const formatPercent = (value: number) => {
@@ -88,9 +96,7 @@ export default function DashboardStats() {
               <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(portfolio?.totalValue || 0)}
               </p>
-              <p className={`text-sm flex items-center ${
-                todayPnL >= 0 ? "text-crypto-success" : "text-crypto-danger"
-              }`}>
+              <p className={`text-sm flex items-center ${getChangeColor(todayPnL)}`}>
                 {todayPnL >= 0 ? (
                   <ArrowUp className="w-3 h-3 mr-1" />
                 ) : (
@@ -111,13 +117,13 @@ export default function DashboardStats() {
               <h3 className="text-sm font-medium text-muted-foreground">
                 Today's P&L
               </h3>
-              <TrendingUp className={`w-5 h-5 ${todayPnL >= 0 ? "text-crypto-success" : "text-crypto-danger"}`} />
+              <TrendingUp className={`w-5 h-5 ${getChangeColor(todayPnL)}`} />
             </div>
             <div className="space-y-2">
-              <p className={`text-2xl font-bold ${todayPnL >= 0 ? "text-crypto-success" : "text-crypto-danger"}`}>
+              <p className={`text-2xl font-bold ${getChangeColor(todayPnL)}`}>
                 {todayPnL >= 0 ? "+" : ""}{formatCurrency(todayPnL)}
               </p>
-              <p className={`text-sm flex items-center ${todayPnL >= 0 ? "text-crypto-success" : "text-crypto-danger"}`}>
+              <p className={`text-sm flex items-center ${getChangeColor(todayPnL)}`}>
                 {todayPnL >= 0 ? (
                   <ArrowUp className="w-3 h-3 mr-1" />
                 ) : (
