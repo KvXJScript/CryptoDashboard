@@ -97,11 +97,18 @@ export default function TradingModal({ isOpen, onClose, crypto, tradeType }: Tra
     }).format(value);
   };
 
+  const calculateCryptoAmount = () => {
+    if (!crypto || !amount) return 0;
+    const usdAmount = parseFloat(amount);
+    if (isNaN(usdAmount)) return 0;
+    return usdAmount / crypto.price;
+  };
+
   const calculateTotal = () => {
     if (!crypto || !amount) return 0;
-    const amountNum = parseFloat(amount);
-    if (isNaN(amountNum)) return 0;
-    return amountNum * crypto.price;
+    const usdAmount = parseFloat(amount);
+    if (isNaN(usdAmount)) return 0;
+    return usdAmount; // This should be the USD amount entered, not multiplied by price
   };
 
   const calculateFee = () => {
@@ -113,13 +120,6 @@ export default function TradingModal({ isOpen, onClose, crypto, tradeType }: Tra
     const total = calculateTotal();
     const fee = calculateFee();
     return activeTradeType === "buy" ? total + fee : total - fee;
-  };
-
-  const calculateCryptoAmount = () => {
-    if (!crypto || !amount) return 0;
-    const usdAmount = parseFloat(amount);
-    if (isNaN(usdAmount)) return 0;
-    return usdAmount / crypto.price;
   };
 
   const getCurrentHolding = () => {
@@ -165,7 +165,22 @@ export default function TradingModal({ isOpen, onClose, crypto, tradeType }: Tra
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="w-full max-w-md">
         <DialogHeader>
-          <DialogTitle>Trade {crypto.name}</DialogTitle>
+          <DialogTitle className="text-center">
+            <div className="flex flex-col items-center space-y-2">
+              <div className="text-xl font-bold">{crypto.name}</div>
+              <div className="text-sm font-medium text-gray-500 dark:text-gray-400">{crypto.symbol}</div>
+              <div className="flex items-center space-x-2">
+                <span className="text-lg font-semibold">{formatCurrency(crypto.price)}</span>
+                <span className={`text-sm font-medium ${
+                  crypto.change24h >= 0 
+                    ? 'text-green-600 dark:text-green-400' 
+                    : 'text-red-600 dark:text-red-400'
+                }`}>
+                  {crypto.change24h >= 0 ? '+' : ''}{crypto.change24h.toFixed(2)}%
+                </span>
+              </div>
+            </div>
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -214,7 +229,7 @@ export default function TradingModal({ isOpen, onClose, crypto, tradeType }: Tra
             </div>
             {amount && (
               <p className="text-sm text-gray-500 mt-2">
-                ≈ {calculateCryptoAmount().toFixed(crypto.symbol === "BTC" ? 8 : 4)} {crypto.symbol}
+                ≈ {calculateCryptoAmount().toFixed(crypto.symbol === "BTC" ? 8 : 6)} {crypto.symbol}
               </p>
             )}
           </div>
