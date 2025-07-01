@@ -163,24 +163,22 @@ export default function Watchlist() {
                 </div>
                 <div className="col-span-3 text-right">
                   <p className="text-sm font-medium text-foreground">{formatPrice(item.price)}</p>
+                  <p className={`text-xs font-medium ${
+                    item.change24h >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                  }`}>
+                    {item.change24h >= 0 ? (
+                      <ArrowUp className="w-3 h-3 mr-1 inline" />
+                    ) : (
+                      <ArrowDown className="w-3 h-3 mr-1 inline" />
+                    )}
+                    {formatPercent(item.change24h)}
+                  </p>
                 </div>
-                <div className="col-span-2 flex items-center justify-end space-x-2">
-                  <div className="text-right">
-                    <p className={`text-sm font-medium flex items-center justify-end ${
-                      item.change24h >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-                    }`}>
-                      {item.change24h >= 0 ? (
-                        <ArrowUp className="w-3 h-3 mr-1" />
-                      ) : (
-                        <ArrowDown className="w-3 h-3 mr-1" />
-                      )}
-                      {formatPercent(item.change24h)}
-                    </p>
-                  </div>
+                <div className="col-span-2 flex items-center justify-end">
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="w-6 h-6 ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
+                    className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
                     onClick={() => removeFromWatchlistMutation.mutate(item.symbol)}
                     disabled={removeFromWatchlistMutation.isPending}
                   >

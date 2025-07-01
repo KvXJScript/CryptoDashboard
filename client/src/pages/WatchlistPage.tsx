@@ -248,15 +248,19 @@ export default function WatchlistPage() {
                         </div>
 
                         <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <p className="font-semibold text-foreground">{formatPrice(item.price)}</p>
-                            <p className={`text-sm font-medium flex items-center justify-end ${getChangeColor(item.change24h)}`}>
+                          <div className="text-right min-w-0 flex-shrink-0">
+                            <p className="font-semibold text-foreground truncate">{formatPrice(item.price)}</p>
+                            <p className={`text-sm font-medium flex items-center justify-end ${
+                              item.change24h >= 0 
+                                ? 'text-green-600 dark:text-green-400' 
+                                : 'text-red-600 dark:text-red-400'
+                            }`}>
                               {item.change24h >= 0 ? (
-                                <ArrowUp className="w-3 h-3 mr-1" />
+                                <ArrowUp className="w-3 h-3 mr-1 flex-shrink-0" />
                               ) : (
-                                <ArrowDown className="w-3 h-3 mr-1" />
+                                <ArrowDown className="w-3 h-3 mr-1 flex-shrink-0" />
                               )}
-                              {formatPercent(item.change24h)}
+                              <span className="truncate">{formatPercent(item.change24h)}</span>
                             </p>
                           </div>
 
@@ -359,29 +363,35 @@ export default function WatchlistPage() {
                 {availableCryptos.slice(0, 10).map((crypto) => (
                   <div
                     key={crypto.symbol}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors cursor-pointer"
+                    className="grid grid-cols-12 items-center gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors cursor-pointer group"
                     onClick={() => {
                       addToWatchlistMutation.mutate(crypto.symbol);
                       setShowAddModal(false);
                       setSearchTerm("");
                     }}
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="col-span-1">
                       <div className="w-8 h-8 bg-gradient-to-r from-crypto-primary to-crypto-success rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-xs">{crypto.symbol}</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">{crypto.name}</p>
-                        <p className="text-xs text-muted-foreground">{crypto.symbol}</p>
+                        <span className="text-white font-semibold text-xs">{crypto.symbol.slice(0,2)}</span>
                       </div>
                     </div>
-                    <div className="text-right mr-4">
-                      <p className="font-medium text-foreground">${crypto.price.toFixed(4)}</p>
-                      <p className={`text-xs font-medium ${getChangeColor(crypto.change24h)}`}>
+                    <div className="col-span-6">
+                      <p className="font-medium text-foreground text-sm">{crypto.name}</p>
+                      <p className="text-xs text-muted-foreground">{crypto.symbol}</p>
+                    </div>
+                    <div className="col-span-4 text-right">
+                      <p className="font-medium text-foreground text-sm">{formatCurrency(crypto.price)}</p>
+                      <p className={`text-xs font-medium ${
+                        crypto.change24h >= 0 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
                         {crypto.change24h >= 0 ? "+" : ""}{crypto.change24h.toFixed(2)}%
                       </p>
                     </div>
-                    <Plus className="w-4 h-4 text-crypto-primary" />
+                    <div className="col-span-1 flex justify-center">
+                      <Plus className="w-4 h-4 text-crypto-primary group-hover:text-crypto-primary/80 transition-colors" />
+                    </div>
                   </div>
                 ))}
                 {availableCryptos.length === 0 && searchTerm && (

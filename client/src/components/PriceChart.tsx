@@ -93,53 +93,55 @@ export default function PriceChart() {
     >
       <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl hover-lift">
         <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <div className="flex items-center space-x-4">
-            <h2 className="text-lg font-semibold text-foreground">Portfolio Performance</h2>
-            <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-sm font-medium ${
-              portfolioChange.percentage >= 0 
-                ? "bg-crypto-success/10 text-crypto-success" 
-                : "bg-crypto-danger/10 text-crypto-danger"
-            }`}>
-              {portfolioChange.percentage >= 0 ? (
-                <TrendingUp className="w-4 h-4" />
-              ) : (
-                <TrendingDown className="w-4 h-4" />
-              )}
-              <span>{portfolioChange.percentage >= 0 ? "+" : ""}{portfolioChange.percentage.toFixed(2)}%</span>
-            </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="flex items-center space-x-2">
-              {cryptoOptions.map((crypto) => (
-                <Button
-                  key={crypto.value}
-                  size="sm"
-                  variant={selectedCrypto === crypto.value ? "default" : "outline"}
-                  className="text-xs"
-                  onClick={() => setSelectedCrypto(crypto.value)}
-                >
-                  {crypto.label}
-                </Button>
-              ))}
+          <div className="flex flex-col space-y-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
+                <h2 className="text-lg font-semibold text-foreground">Portfolio Performance</h2>
+                <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-sm font-medium w-fit ${
+                  portfolioChange.percentage >= 0 
+                    ? "bg-crypto-success/10 text-crypto-success" 
+                    : "bg-crypto-danger/10 text-crypto-danger"
+                }`}>
+                  {portfolioChange.percentage >= 0 ? (
+                    <TrendingUp className="w-4 h-4" />
+                  ) : (
+                    <TrendingDown className="w-4 h-4" />
+                  )}
+                  <span>{portfolioChange.percentage >= 0 ? "+" : ""}{portfolioChange.percentage.toFixed(2)}%</span>
+                </div>
+              </div>
             </div>
             
-            <div className="flex items-center space-x-2">
-              {timeframes.map((timeframe) => (
-                <Button
-                  key={timeframe.value}
-                  size="sm"
-                  variant={activeTimeframe === timeframe.value ? "default" : "outline"}
-                  className="px-3 py-1 text-xs"
-                  onClick={() => setActiveTimeframe(timeframe.value)}
-                >
-                  {timeframe.label}
-                </Button>
-              ))}
+            <div className="flex flex-col space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {cryptoOptions.map((crypto) => (
+                  <Button
+                    key={crypto.value}
+                    size="sm"
+                    variant={selectedCrypto === crypto.value ? "default" : "outline"}
+                    className="text-xs flex-shrink-0"
+                    onClick={() => setSelectedCrypto(crypto.value)}
+                  >
+                    {crypto.label}
+                  </Button>
+                ))}
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {timeframes.map((timeframe) => (
+                  <Button
+                    key={timeframe.value}
+                    size="sm"
+                    variant={activeTimeframe === timeframe.value ? "default" : "outline"}
+                    className="px-3 py-1 text-xs flex-shrink-0 min-w-[45px]"
+                    onClick={() => setActiveTimeframe(timeframe.value)}
+                  >
+                    {timeframe.label}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
         <div className="h-80 w-full">
           {isLoading ? (
