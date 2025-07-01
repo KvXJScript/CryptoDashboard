@@ -194,15 +194,19 @@ class MemoryStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     const existingUser = Array.from(this.users.values()).find(u => u.email === userData.email);
     if (existingUser) {
-      this.users.set(existingUser.id, { ...existingUser, ...userData });
-      return this.users.get(existingUser.id)!;
+      const updated = { ...existingUser, ...userData };
+      this.users.set(existingUser.id.toString(), updated);
+      return updated;
     }
     
     const newUser: User = {
-      id: this.nextId++,
-      email: userData.email,
-      name: userData.name,
+      id: (this.nextId++).toString(),
+      email: userData.email || null,
+      firstName: userData.firstName || null,
+      lastName: userData.lastName || null,
+      profileImageUrl: userData.profileImageUrl || null,
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
     this.users.set(newUser.id.toString(), newUser);
     return newUser;
@@ -251,6 +255,7 @@ class MemoryStorage implements IStorage {
     const newTransaction: Transaction = {
       id: this.nextId++,
       ...transaction,
+      fee: transaction.fee || null,
       createdAt: new Date(),
     };
     
@@ -312,7 +317,6 @@ class MemoryStorage implements IStorage {
       id: this.nextId++,
       userId,
       balance: "10000.00",
-      createdAt: new Date(),
       updatedAt: new Date(),
     };
     this.balances.set(userId, newBalance);
@@ -320,13 +324,6 @@ class MemoryStorage implements IStorage {
   }
 }
 
-// Export storage with fallback
-let storage: IStorage;
-try {
-  storage = new DatabaseStorage();
-} catch (error) {
-  console.warn("Database unavailable, using memory storage:", error);
-  storage = new MemoryStorage();
-}
-
-export { storage };
+// Export storage with memory fallback due to database issues
+console.warn("Using memory storage due to database connection issues");
+export const storage = new MemoryStorage();

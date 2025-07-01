@@ -26,23 +26,12 @@ const getOidcConfig = memoize(
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   
-  // Use memory store as fallback when database is unavailable
-  let sessionStore;
-  try {
-    const pgStore = connectPg(session);
-    sessionStore = new pgStore({
-      conString: process.env.DATABASE_URL,
-      createTableIfMissing: false,
-      ttl: sessionTtl / 1000,
-      tableName: "sessions",
-    });
-  } catch (error) {
-    console.warn("Database unavailable, using memory store for sessions:", error);
-    const MemStore = MemoryStore(session);
-    sessionStore = new MemStore({
-      checkPeriod: sessionTtl,
-    });
-  }
+  // Use memory store due to database connection issues
+  console.warn("Using memory store for sessions due to database unavailability");
+  const MemStore = MemoryStore(session);
+  const sessionStore = new MemStore({
+    checkPeriod: sessionTtl,
+  });
   return session({
     secret: process.env.SESSION_SECRET || process.env.REPL_ID || 'fallback-secret-for-development',
     store: sessionStore,
