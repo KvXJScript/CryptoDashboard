@@ -23,6 +23,7 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Dashboard} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/portfolio" component={Portfolio} />
           <Route path="/trade" component={Trade} />
           <Route path="/watchlist" component={WatchlistPage} />

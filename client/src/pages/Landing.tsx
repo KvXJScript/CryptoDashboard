@@ -166,9 +166,12 @@ function AnimatedLineChart() {
     ctx.scale(2, 2);
 
     const data = chartData[timeframe];
-    const padding = 40;
-    const chartWidth = canvas.offsetWidth - padding * 2;
-    const chartHeight = canvas.offsetHeight - padding * 2;
+    const leftPadding = 80; // Increased left padding for price labels
+    const rightPadding = 20;
+    const topPadding = 20;
+    const bottomPadding = 40;
+    const chartWidth = canvas.offsetWidth - leftPadding - rightPadding;
+    const chartHeight = canvas.offsetHeight - topPadding - bottomPadding;
 
     // Clear canvas with solid dark background
     ctx.fillStyle = '#0a0a0a';
@@ -187,23 +190,23 @@ function AnimatedLineChart() {
     ctx.font = '12px Inter, sans-serif';
     
     for (let i = 0; i <= 4; i++) {
-      const y = padding + (chartHeight / 4) * i;
+      const y = topPadding + (chartHeight / 4) * i;
       ctx.beginPath();
-      ctx.moveTo(padding, y);
-      ctx.lineTo(canvas.offsetWidth - padding, y);
+      ctx.moveTo(leftPadding, y);
+      ctx.lineTo(canvas.offsetWidth - rightPadding, y);
       ctx.stroke();
       
-      // Add price labels with better positioning to avoid overlap
+      // Add price labels on the far left
       const priceValue = maxValue - (i * valueRange / 4);
-      ctx.fillText(`$${priceValue.toLocaleString()}`, padding + 20, y - 8);
+      ctx.fillText(`$${priceValue.toLocaleString()}`, 8, y + 4);
     }
     
     // Draw vertical grid lines (time)
     for (let i = 0; i < data.length; i++) {
-      const x = padding + (chartWidth / (data.length - 1)) * i;
+      const x = leftPadding + (chartWidth / (data.length - 1)) * i;
       ctx.beginPath();
-      ctx.moveTo(x, padding);
-      ctx.lineTo(x, padding + chartHeight);
+      ctx.moveTo(x, topPadding);
+      ctx.lineTo(x, topPadding + chartHeight);
       ctx.stroke();
       
       // Add time labels
@@ -220,9 +223,9 @@ function AnimatedLineChart() {
 
     // Draw all points up to animated length
     for (let i = 0; i <= animatedLength && i < data.length; i++) {
-      const x = padding + (chartWidth / (data.length - 1)) * i;
+      const x = leftPadding + (chartWidth / (data.length - 1)) * i;
       const normalizedValue = (data[i].value - minValue) / valueRange;
-      const y = padding + chartHeight - (normalizedValue * chartHeight);
+      const y = topPadding + chartHeight - (normalizedValue * chartHeight);
 
       if (i === 0) {
         ctx.moveTo(x, y);
@@ -236,11 +239,11 @@ function AnimatedLineChart() {
       const currentIndex = animatedLength;
       const nextIndex = currentIndex + 1;
       
-      const currentX = padding + (chartWidth / (data.length - 1)) * currentIndex;
-      const nextX = padding + (chartWidth / (data.length - 1)) * nextIndex;
+      const currentX = leftPadding + (chartWidth / (data.length - 1)) * currentIndex;
+      const nextX = leftPadding + (chartWidth / (data.length - 1)) * nextIndex;
       
-      const currentY = padding + chartHeight - ((data[currentIndex].value - minValue) / valueRange * chartHeight);
-      const nextY = padding + chartHeight - ((data[nextIndex].value - minValue) / valueRange * chartHeight);
+      const currentY = topPadding + chartHeight - ((data[currentIndex].value - minValue) / valueRange * chartHeight);
+      const nextY = topPadding + chartHeight - ((data[nextIndex].value - minValue) / valueRange * chartHeight);
       
       const interpolatedX = currentX + (nextX - currentX) * partialProgress;
       const interpolatedY = currentY + (nextY - currentY) * partialProgress;
@@ -258,9 +261,9 @@ function AnimatedLineChart() {
 
     // Draw points with hover effect
     for (let i = 0; i <= animatedLength && i < data.length; i++) {
-      const x = padding + (chartWidth / (data.length - 1)) * i;
+      const x = leftPadding + (chartWidth / (data.length - 1)) * i;
       const normalizedValue = (data[i].value - minValue) / valueRange;
-      const y = padding + chartHeight - (normalizedValue * chartHeight);
+      const y = topPadding + chartHeight - (normalizedValue * chartHeight);
 
       // Outer glow
       ctx.save();
@@ -283,7 +286,7 @@ function AnimatedLineChart() {
 
     // Fill area under the curve
     if (animatedLength > 0) {
-      const areaGradient = ctx.createLinearGradient(0, padding, 0, padding + chartHeight);
+      const areaGradient = ctx.createLinearGradient(0, topPadding, 0, topPadding + chartHeight);
       areaGradient.addColorStop(0, 'rgba(0, 255, 136, 0.3)');
       areaGradient.addColorStop(1, 'rgba(0, 255, 136, 0.05)');
       
@@ -291,25 +294,25 @@ function AnimatedLineChart() {
       ctx.beginPath();
       
       // Start from bottom left
-      const firstX = padding;
-      ctx.moveTo(firstX, padding + chartHeight);
+      const firstX = leftPadding;
+      ctx.moveTo(firstX, topPadding + chartHeight);
       
       // Draw to first point
-      const firstY = padding + chartHeight - ((data[0].value - minValue) / valueRange * chartHeight);
+      const firstY = topPadding + chartHeight - ((data[0].value - minValue) / valueRange * chartHeight);
       ctx.lineTo(firstX, firstY);
       
       // Follow the line
       for (let i = 1; i <= animatedLength && i < data.length; i++) {
-        const x = padding + (chartWidth / (data.length - 1)) * i;
+        const x = leftPadding + (chartWidth / (data.length - 1)) * i;
         const normalizedValue = (data[i].value - minValue) / valueRange;
-        const y = padding + chartHeight - (normalizedValue * chartHeight);
+        const y = topPadding + chartHeight - (normalizedValue * chartHeight);
         ctx.lineTo(x, y);
       }
       
       // Close the path to bottom
       if (animatedLength > 0) {
-        const lastX = padding + (chartWidth / (data.length - 1)) * Math.min(animatedLength, data.length - 1);
-        ctx.lineTo(lastX, padding + chartHeight);
+        const lastX = leftPadding + (chartWidth / (data.length - 1)) * Math.min(animatedLength, data.length - 1);
+        ctx.lineTo(lastX, topPadding + chartHeight);
       }
       
       ctx.closePath();
