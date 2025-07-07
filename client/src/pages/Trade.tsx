@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { Search, TrendingUp, TrendingDown } from "lucide-react";
+import CryptoIcon from "@/components/CryptoIcon";
 
 interface CryptoPrice {
   symbol: string;
@@ -219,35 +220,40 @@ export default function Trade() {
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
+                  <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
                     {filteredCryptos.map((crypto) => (
                       <div
                         key={crypto.symbol}
-                        className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/30 transition-all duration-300 group cursor-pointer"
+                        className="grid grid-cols-12 items-center gap-3 p-4 rounded-xl hover:bg-muted/30 transition-all duration-300 group cursor-pointer"
                       >
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-crypto-primary to-crypto-success rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">{crypto.symbol}</span>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-foreground">{crypto.name}</p>
-                            <p className="text-sm text-muted-foreground">{crypto.symbol}</p>
-                          </div>
+                        <div className="col-span-1">
+                          <CryptoIcon 
+                            coinId={crypto.coinGeckoId}
+                            symbol={crypto.symbol}
+                            size="md"
+                            className="ring-2 ring-border/20"
+                          />
                         </div>
-
-                        <div className="text-right">
+                        <div className="col-span-4">
+                          <p className="font-semibold text-foreground">{crypto.name}</p>
+                          <p className="text-sm text-muted-foreground">{crypto.symbol}</p>
+                        </div>
+                        <div className="col-span-2 text-right">
                           <p className="font-semibold text-foreground">
                             {formatCurrency(crypto.price)}
                           </p>
-                          <p className={`text-sm font-medium ${getChangeColor(crypto.change24h)}`}>
+                          <p className={`text-xs font-medium ${
+                            crypto.change24h >= 0 
+                              ? 'text-green-600 dark:text-green-400' 
+                              : 'text-red-600 dark:text-red-400'
+                          }`}>
                             {crypto.change24h >= 0 ? "+" : ""}{crypto.change24h.toFixed(2)}%
                           </p>
                         </div>
-
-                        <div className="flex items-center space-x-2">
+                        <div className="col-span-5 flex items-center justify-end space-x-3">
                           <Button
                             size="sm"
-                            className="px-4 py-2 text-xs bg-green-400 text-white rounded-lg hover:bg-green-500 transition-colors"
+                            className="px-4 py-2 text-xs bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
                             onClick={() => handleTrade(crypto, "buy")}
                           >
                             Buy
@@ -255,7 +261,7 @@ export default function Trade() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            className="px-4 py-2 text-xs bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors"
+                            className="px-4 py-2 text-xs bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
                             onClick={() => handleTrade(crypto, "sell")}
                           >
                             Sell

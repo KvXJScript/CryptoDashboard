@@ -120,24 +120,22 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
                 <p className="font-medium text-foreground">{crypto.name}</p>
                 <p className="text-sm text-muted-foreground font-mono font-semibold">{crypto.symbol}</p>
               </div>
-              <div className="col-span-3 text-right">
-                <p className="font-semibold text-foreground">{formatPrice(crypto.price)}</p>
-              </div>
               <div className="col-span-2 text-right">
-                <p className={`text-sm flex items-center justify-end font-medium ${
+                <p className="font-semibold text-foreground">{formatPrice(crypto.price)}</p>
+                <p className={`text-xs font-medium ${
                   crypto.change24h >= 0 
                     ? 'text-green-600 dark:text-green-400' 
                     : 'text-red-600 dark:text-red-400'
                 }`}>
                   {crypto.change24h >= 0 ? (
-                    <ArrowUp className="w-3 h-3 mr-1" />
+                    <ArrowUp className="w-3 h-3 mr-1 inline" />
                   ) : (
-                    <ArrowDown className="w-3 h-3 mr-1" />
+                    <ArrowDown className="w-3 h-3 mr-1 inline" />
                   )}
                   <span>{formatPercent(crypto.change24h)}</span>
                 </p>
               </div>
-              <div className="col-span-2 flex items-center justify-end space-x-2">
+              <div className="col-span-3 flex items-center justify-end space-x-3">
                 <Button
                   size="sm"
                   className="px-3 py-1 text-xs bg-green-600 dark:bg-green-500 text-white rounded-full hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
