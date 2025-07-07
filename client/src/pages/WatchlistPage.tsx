@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, X, Search, ArrowUp, ArrowDown, Bell, Star } from "lucide-react";
+import CryptoIcon from "@/components/CryptoIcon";
 
 interface WatchlistItem {
   id: number;
@@ -236,9 +237,12 @@ export default function WatchlistPage() {
                         transition={{ duration: 0.5, delay: index * 0.1 }}
                       >
                         <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-crypto-primary to-crypto-success rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">{item.symbol}</span>
-                          </div>
+                          <CryptoIcon 
+                            coinId={cryptos?.find(c => c.symbol === item.symbol)?.coinGeckoId || item.symbol.toLowerCase()}
+                            symbol={item.symbol}
+                            size="lg"
+                            className="ring-2 ring-border/30 shadow-md"
+                          />
                           <div>
                             <p className="font-semibold text-foreground">{item.symbol}</p>
                             <p className="text-sm text-muted-foreground">
@@ -371,9 +375,12 @@ export default function WatchlistPage() {
                     }}
                   >
                     <div className="col-span-1">
-                      <div className="w-8 h-8 bg-gradient-to-r from-crypto-primary to-crypto-success rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-xs">{crypto.symbol.slice(0,2)}</span>
-                      </div>
+                      <CryptoIcon 
+                        coinId={crypto.coinGeckoId}
+                        symbol={crypto.symbol}
+                        size="sm"
+                        className="ring-1 ring-border/20"
+                      />
                     </div>
                     <div className="col-span-6">
                       <p className="font-medium text-foreground text-sm">{crypto.name}</p>

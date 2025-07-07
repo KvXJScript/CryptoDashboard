@@ -153,8 +153,8 @@ export default function Watchlist() {
                   <CryptoIcon 
                     coinId={item.symbol.toLowerCase()}
                     symbol={item.symbol}
-                    size="sm"
-                    className="ring-1 ring-border/20"
+                    size="md"
+                    className="ring-2 ring-border/30 shadow-sm"
                   />
                 </div>
                 <div className="col-span-6">
