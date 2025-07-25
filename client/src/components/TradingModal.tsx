@@ -7,6 +7,8 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import CryptoIcon from "@/components/CryptoIcon";
+import { ArrowUp, ArrowDown, TrendingUp, TrendingDown } from "lucide-react";
 
 interface CryptoPrice {
   symbol: string;
@@ -92,14 +94,23 @@ export default function TradingModal({ isOpen, onClose, crypto, tradeType }: Tra
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(value);
+  };
+
+  const calculateCryptoAmount = () => {
+    if (!crypto || !amount) return 0;
+    const usdAmount = parseFloat(amount);
+    if (isNaN(usdAmount)) return 0;
+    return usdAmount / crypto.price;
   };
 
   const calculateTotal = () => {
     if (!crypto || !amount) return 0;
-    const amountNum = parseFloat(amount);
-    if (isNaN(amountNum)) return 0;
-    return amountNum * crypto.price;
+    const usdAmount = parseFloat(amount);
+    if (isNaN(usdAmount)) return 0;
+    return usdAmount; // This should be the USD amount entered, not multiplied by price
   };
 
   const calculateFee = () => {
@@ -111,13 +122,6 @@ export default function TradingModal({ isOpen, onClose, crypto, tradeType }: Tra
     const total = calculateTotal();
     const fee = calculateFee();
     return activeTradeType === "buy" ? total + fee : total - fee;
-  };
-
-  const calculateCryptoAmount = () => {
-    if (!crypto || !amount) return 0;
-    const usdAmount = parseFloat(amount);
-    if (isNaN(usdAmount)) return 0;
-    return usdAmount / crypto.price;
   };
 
   const getCurrentHolding = () => {
@@ -159,34 +163,84 @@ export default function TradingModal({ isOpen, onClose, crypto, tradeType }: Tra
 
   if (!crypto) return null;
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: price < 1 ? 6 : 2,
+    }).format(price);
+  };
+
+  const formatPercent = (change: number) => {
+    return `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-w-md">
+      <DialogContent className="w-full max-w-lg bg-card/95 backdrop-blur-xl border-border/40">
         <DialogHeader>
-          <DialogTitle>Trade {crypto.name}</DialogTitle>
+          <DialogTitle className="text-center">
+            <div className="flex flex-col items-center space-y-4 p-2">
+              <div className="flex items-center space-x-4">
+                <CryptoIcon 
+                  coinId={crypto.coinGeckoId}
+                  symbol={crypto.symbol}
+                  size="lg"
+                  className="ring-2 ring-border/30 shadow-lg"
+                />
+                <div className="text-left">
+                  <div className="text-2xl font-bold text-foreground">{crypto.name}</div>
+                  <div className="text-sm font-medium text-muted-foreground font-mono">{crypto.symbol}</div>
+                </div>
+              </div>
+              
+              <div className="bg-muted/30 rounded-xl p-4 w-full">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-semibold text-foreground">{formatPrice(crypto.price)}</span>
+                  <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${
+                    crypto.change24h >= 0 
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
+                      : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                  }`}>
+                    {crypto.change24h >= 0 ? (
+                      <TrendingUp className="w-4 h-4" />
+                    ) : (
+                      <TrendingDown className="w-4 h-4" />
+                    )}
+                    <span>{formatPercent(crypto.change24h)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Trade Type Toggle */}
-          <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          <div className="flex bg-muted rounded-xl p-1">
             <Button
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium ${
+              variant="ghost"
+              className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 activeTradeType === "buy"
-                  ? "bg-crypto-success text-white"
-                  : "text-gray-500 hover:text-gray-700 bg-transparent"
+                  ? "bg-green-600 dark:bg-green-500 text-white shadow-lg"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
               }`}
               onClick={() => setActiveTradeType("buy")}
             >
+              <TrendingUp className="w-4 h-4 mr-2" />
               Buy
             </Button>
             <Button
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium ${
+              variant="ghost"
+              className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 activeTradeType === "sell"
-                  ? "bg-crypto-danger text-white"
-                  : "text-gray-500 hover:text-gray-700 bg-transparent"
+                  ? "bg-red-600 dark:bg-red-500 text-white shadow-lg"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
               }`}
               onClick={() => setActiveTradeType("sell")}
             >
+              <TrendingDown className="w-4 h-4 mr-2" />
               Sell
             </Button>
           </div>
@@ -212,7 +266,7 @@ export default function TradingModal({ isOpen, onClose, crypto, tradeType }: Tra
             </div>
             {amount && (
               <p className="text-sm text-gray-500 mt-2">
-                ≈ {calculateCryptoAmount().toFixed(crypto.symbol === "BTC" ? 8 : 4)} {crypto.symbol}
+                ≈ {calculateCryptoAmount().toFixed(crypto.symbol === "BTC" ? 8 : 6)} {crypto.symbol}
               </p>
             )}
           </div>

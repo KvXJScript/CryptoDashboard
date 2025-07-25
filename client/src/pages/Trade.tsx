@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { Search, TrendingUp, TrendingDown } from "lucide-react";
+import CryptoIcon from "@/components/CryptoIcon";
 
 interface CryptoPrice {
   symbol: string;
@@ -91,7 +92,15 @@ export default function Trade() {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(value);
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return "text-green-400"; // Bright green for positive
+    if (change < 0) return "text-red-400"; // Light red for negative
+    return "text-gray-400"; // Neutral for zero
   };
 
   const topGainers = cryptos?.filter(c => c.change24h > 0).sort((a, b) => b.change24h - a.change24h).slice(0, 3) || [];
@@ -113,7 +122,12 @@ export default function Trade() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
           <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -132,12 +146,12 @@ export default function Trade() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium text-muted-foreground">Top Gainer</h3>
-                <TrendingUp className="w-5 h-5 text-crypto-success" />
+                <TrendingUp className="w-5 h-5 text-green-400" />
               </div>
               {topGainers[0] ? (
                 <div>
                   <p className="text-lg font-bold text-foreground">{topGainers[0].symbol}</p>
-                  <p className="text-sm text-crypto-success">+{topGainers[0].change24h.toFixed(2)}%</p>
+                  <p className={`text-sm ${getChangeColor(topGainers[0].change24h)}`}>+{topGainers[0].change24h.toFixed(2)}%</p>
                 </div>
               ) : (
                 <p className="text-muted-foreground">No data</p>
@@ -149,21 +163,26 @@ export default function Trade() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium text-muted-foreground">Top Loser</h3>
-                <TrendingDown className="w-5 h-5 text-crypto-danger" />
+                <TrendingDown className="w-5 h-5 text-red-400" />
               </div>
               {topLosers[0] ? (
                 <div>
                   <p className="text-lg font-bold text-foreground">{topLosers[0].symbol}</p>
-                  <p className="text-sm text-crypto-danger">{topLosers[0].change24h.toFixed(2)}%</p>
+                  <p className={`text-sm ${getChangeColor(topLosers[0].change24h)}`}>{topLosers[0].change24h.toFixed(2)}%</p>
                 </div>
               ) : (
                 <p className="text-muted-foreground">No data</p>
               )}
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <motion.div 
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
           {/* Main Trading Interface */}
           <div className="lg:col-span-2">
             <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
@@ -200,37 +219,40 @@ export default function Trade() {
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
+                  <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
                     {filteredCryptos.map((crypto) => (
                       <div
                         key={crypto.symbol}
-                        className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/30 transition-all duration-300 group cursor-pointer"
+                        className="grid grid-cols-12 items-center gap-3 p-4 rounded-xl hover:bg-muted/30 transition-all duration-300 group cursor-pointer"
                       >
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-crypto-primary to-crypto-success rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">{crypto.symbol}</span>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-foreground">{crypto.name}</p>
-                            <p className="text-sm text-muted-foreground">{crypto.symbol}</p>
-                          </div>
+                        <div className="col-span-1">
+                          <CryptoIcon 
+                            coinId={crypto.coinGeckoId}
+                            symbol={crypto.symbol}
+                            size="md"
+                            className="ring-2 ring-border/20"
+                          />
                         </div>
-
-                        <div className="text-right">
+                        <div className="col-span-4">
+                          <p className="font-semibold text-foreground">{crypto.name}</p>
+                          <p className="text-sm text-muted-foreground">{crypto.symbol}</p>
+                        </div>
+                        <div className="col-span-2 text-right">
                           <p className="font-semibold text-foreground">
                             {formatCurrency(crypto.price)}
                           </p>
-                          <p className={`text-sm font-medium ${
-                            crypto.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
+                          <p className={`text-xs font-medium ${
+                            crypto.change24h >= 0 
+                              ? 'text-green-600 dark:text-green-400' 
+                              : 'text-red-600 dark:text-red-400'
                           }`}>
                             {crypto.change24h >= 0 ? "+" : ""}{crypto.change24h.toFixed(2)}%
                           </p>
                         </div>
-
-                        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="col-span-5 flex items-center justify-end space-x-3">
                           <Button
                             size="sm"
-                            className="px-4 py-2 text-xs bg-crypto-success text-white rounded-lg hover:bg-crypto-success/80 transition-colors"
+                            className="px-4 py-2 text-xs bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
                             onClick={() => handleTrade(crypto, "buy")}
                           >
                             Buy
@@ -238,7 +260,7 @@ export default function Trade() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            className="px-4 py-2 text-xs bg-crypto-danger text-white rounded-lg hover:bg-crypto-danger/80 transition-colors"
+                            className="px-4 py-2 text-xs bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
                             onClick={() => handleTrade(crypto, "sell")}
                           >
                             Sell
@@ -264,7 +286,7 @@ export default function Trade() {
                         <p className="font-medium text-foreground">{crypto.symbol}</p>
                         <p className="text-xs text-muted-foreground">{formatCurrency(crypto.price)}</p>
                       </div>
-                      <p className="text-crypto-success font-medium">
+                      <p className={`font-medium ${getChangeColor(crypto.change24h)}`}>
                         +{crypto.change24h.toFixed(2)}%
                       </p>
                     </div>
@@ -283,7 +305,7 @@ export default function Trade() {
                         <p className="font-medium text-foreground">{crypto.symbol}</p>
                         <p className="text-xs text-muted-foreground">{formatCurrency(crypto.price)}</p>
                       </div>
-                      <p className="text-crypto-danger font-medium">
+                      <p className={`font-medium ${getChangeColor(crypto.change24h)}`}>
                         {crypto.change24h.toFixed(2)}%
                       </p>
                     </div>
@@ -292,7 +314,7 @@ export default function Trade() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Trading Modal */}

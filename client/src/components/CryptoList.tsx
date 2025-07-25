@@ -28,12 +28,18 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 2,
-      maximumFractionDigits: price < 1 ? 6 : 2,
+      maximumFractionDigits: 2,
     }).format(price);
   };
 
   const formatPercent = (change: number) => {
     return `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`;
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return "text-green-400"; // Bright green for positive
+    if (change < 0) return "text-red-400"; // Light red for negative
+    return "text-gray-400"; // Neutral for zero
   };
 
 
@@ -90,48 +96,48 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-2">
           {cryptos?.map((crypto, index) => (
             <motion.div
               key={crypto.symbol}
-              className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/50 transition-all duration-300 group cursor-pointer hover-lift relative overflow-hidden"
+              className="grid grid-cols-12 items-center gap-3 p-4 rounded-xl hover:bg-muted/50 transition-all duration-300 group cursor-pointer hover-lift relative overflow-hidden"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               whileHover={{ scale: 1.02 }}
               onHoverStart={() => {}}
             >
-              <div className="flex items-center space-x-4">
+              <div className="col-span-1">
                 <CryptoIcon 
                   coinId={crypto.coinGeckoId}
                   symbol={crypto.symbol}
-                  size="lg"
+                  size="md"
                   className="ring-2 ring-border/20"
                 />
-                <div>
-                  <p className="font-medium text-foreground">{crypto.name}</p>
-                  <p className="text-sm text-muted-foreground">{crypto.symbol}</p>
-                </div>
               </div>
-              <div className="text-right">
+              <div className="col-span-4">
+                <p className="font-medium text-foreground">{crypto.name}</p>
+                <p className="text-sm text-muted-foreground font-mono font-semibold">{crypto.symbol}</p>
+              </div>
+              <div className="col-span-2 text-right">
                 <p className="font-semibold text-foreground">{formatPrice(crypto.price)}</p>
-                <p
-                  className={`text-sm flex items-center justify-end font-medium ${
-                    crypto.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
-                  }`}
-                >
+                <p className={`text-xs font-medium ${
+                  crypto.change24h >= 0 
+                    ? 'text-green-600 dark:text-green-400' 
+                    : 'text-red-600 dark:text-red-400'
+                }`}>
                   {crypto.change24h >= 0 ? (
-                    <ArrowUp className="w-3 h-3 mr-1" />
+                    <ArrowUp className="w-3 h-3 mr-1 inline" />
                   ) : (
-                    <ArrowDown className="w-3 h-3 mr-1" />
+                    <ArrowDown className="w-3 h-3 mr-1 inline" />
                   )}
                   <span>{formatPercent(crypto.change24h)}</span>
                 </p>
               </div>
-              <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="col-span-3 flex items-center justify-end space-x-3">
                 <Button
                   size="sm"
-                  className="px-3 py-1 text-xs bg-crypto-success text-white rounded-full hover:bg-crypto-success/80 transition-colors"
+                  className="px-3 py-1 text-xs bg-green-600 dark:bg-green-500 text-white rounded-full hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
                   onClick={() => onTrade(crypto, "buy")}
                 >
                   Buy
@@ -139,7 +145,7 @@ export default function CryptoList({ onTrade }: CryptoListProps) {
                 <Button
                   size="sm"
                   variant="destructive"
-                  className="px-3 py-1 text-xs bg-crypto-danger text-white rounded-full hover:bg-crypto-danger/80 transition-colors"
+                  className="px-3 py-1 text-xs bg-red-600 dark:bg-red-500 text-white rounded-full hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
                   onClick={() => onTrade(crypto, "sell")}
                 >
                   Sell

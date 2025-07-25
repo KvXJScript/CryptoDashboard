@@ -10,24 +10,37 @@ import Dashboard from "@/pages/Dashboard";
 import Portfolio from "@/pages/Portfolio";
 import Trade from "@/pages/Trade";
 import WatchlistPage from "@/pages/WatchlistPage";
+import FAQ from "@/pages/FAQ";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user, error } = useAuth();
+
+  // Authentication logic handles routing
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
+      {!isAuthenticated ? (
+        <Route component={Landing} />
       ) : (
         <>
           <Route path="/" component={Dashboard} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/portfolio" component={Portfolio} />
           <Route path="/trade" component={Trade} />
           <Route path="/watchlist" component={WatchlistPage} />
+          <Route path="/faq" component={FAQ} />
         </>
       )}
-      <Route component={NotFound} />
     </Switch>
   );
 }

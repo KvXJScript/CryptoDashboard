@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, X, Search, ArrowUp, ArrowDown, Bell, Star } from "lucide-react";
+import CryptoIcon from "@/components/CryptoIcon";
 
 interface WatchlistItem {
   id: number;
@@ -39,6 +41,21 @@ export default function WatchlistPage() {
     queryKey: ["/api/crypto/prices"],
     refetchInterval: 30000,
   });
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return "text-green-400"; // Bright green for positive
+    if (change < 0) return "text-red-400"; // Light red for negative
+    return "text-gray-400"; // Neutral for zero
+  };
 
   const addToWatchlistMutation = useMutation({
     mutationFn: async (symbol: string) => {
@@ -130,11 +147,21 @@ export default function WatchlistPage() {
   ) || [];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <motion.div 
+      className="min-h-screen bg-background text-foreground"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+        <motion.div 
+          className="mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">Watchlist</h1>
@@ -148,9 +175,14 @@ export default function WatchlistPage() {
               Add Crypto
             </Button>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <motion.div 
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           {/* Watchlist */}
           <div className="lg:col-span-2">
             <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
@@ -196,12 +228,21 @@ export default function WatchlistPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {watchlist.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/30 transition-colors group">
+                    {watchlist.map((item, index) => (
+                      <motion.div 
+                        key={item.id} 
+                        className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/30 transition-colors group"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                      >
                         <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-crypto-primary to-crypto-success rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">{item.symbol}</span>
-                          </div>
+                          <CryptoIcon 
+                            coinId={cryptos?.find(c => c.symbol === item.symbol)?.coinGeckoId || item.symbol.toLowerCase()}
+                            symbol={item.symbol}
+                            size="lg"
+                            className="ring-2 ring-border/30 shadow-md"
+                          />
                           <div>
                             <p className="font-semibold text-foreground">{item.symbol}</p>
                             <p className="text-sm text-muted-foreground">
@@ -211,31 +252,33 @@ export default function WatchlistPage() {
                         </div>
 
                         <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <p className="font-semibold text-foreground">{formatPrice(item.price)}</p>
+                          <div className="text-right min-w-0 flex-shrink-0">
+                            <p className="font-semibold text-foreground truncate">{formatPrice(item.price)}</p>
                             <p className={`text-sm font-medium flex items-center justify-end ${
-                              item.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
+                              item.change24h >= 0 
+                                ? 'text-green-600 dark:text-green-400' 
+                                : 'text-red-600 dark:text-red-400'
                             }`}>
                               {item.change24h >= 0 ? (
-                                <ArrowUp className="w-3 h-3 mr-1" />
+                                <ArrowUp className="w-3 h-3 mr-1 flex-shrink-0" />
                               ) : (
-                                <ArrowDown className="w-3 h-3 mr-1" />
+                                <ArrowDown className="w-3 h-3 mr-1 flex-shrink-0" />
                               )}
-                              {formatPercent(item.change24h)}
+                              <span className="truncate">{formatPercent(item.change24h)}</span>
                             </p>
                           </div>
 
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-crypto-danger"
+                            className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-400"
                             onClick={() => removeFromWatchlistMutation.mutate(item.symbol)}
                             disabled={removeFromWatchlistMutation.isPending}
                           >
                             <X className="w-4 h-4" />
                           </Button>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 )}
@@ -255,9 +298,7 @@ export default function WatchlistPage() {
                         <p className="font-medium text-foreground">{crypto.symbol}</p>
                         <p className="text-xs text-muted-foreground">{formatPrice(crypto.price)}</p>
                       </div>
-                      <p className={`font-medium ${
-                        crypto.change24h >= 0 ? "text-crypto-success" : "text-crypto-danger"
-                      }`}>
+                      <p className={`font-medium ${getChangeColor(crypto.change24h)}`}>
                         {formatPercent(crypto.change24h)}
                       </p>
                     </div>
@@ -277,13 +318,13 @@ export default function WatchlistPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Gainers</span>
-                      <span className="font-semibold text-crypto-success">
+                      <span className="font-semibold text-green-400">
                         {watchlist.filter(item => item.change24h > 0).length}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Losers</span>
-                      <span className="font-semibold text-crypto-danger">
+                      <span className="font-semibold text-red-400">
                         {watchlist.filter(item => item.change24h < 0).length}
                       </span>
                     </div>
@@ -292,7 +333,7 @@ export default function WatchlistPage() {
               </Card>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Add Crypto Modal */}
@@ -326,23 +367,38 @@ export default function WatchlistPage() {
                 {availableCryptos.slice(0, 10).map((crypto) => (
                   <div
                     key={crypto.symbol}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors cursor-pointer"
+                    className="grid grid-cols-12 items-center gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors cursor-pointer group"
                     onClick={() => {
                       addToWatchlistMutation.mutate(crypto.symbol);
                       setShowAddModal(false);
                       setSearchTerm("");
                     }}
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-crypto-primary to-crypto-success rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-xs">{crypto.symbol}</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">{crypto.name}</p>
-                        <p className="text-xs text-muted-foreground">{crypto.symbol}</p>
-                      </div>
+                    <div className="col-span-1">
+                      <CryptoIcon 
+                        coinId={crypto.coinGeckoId}
+                        symbol={crypto.symbol}
+                        size="sm"
+                        className="ring-1 ring-border/20"
+                      />
                     </div>
-                    <Plus className="w-4 h-4 text-crypto-primary" />
+                    <div className="col-span-6">
+                      <p className="font-medium text-foreground text-sm">{crypto.name}</p>
+                      <p className="text-xs text-muted-foreground">{crypto.symbol}</p>
+                    </div>
+                    <div className="col-span-4 text-right">
+                      <p className="font-medium text-foreground text-sm">{formatCurrency(crypto.price)}</p>
+                      <p className={`text-xs font-medium ${
+                        crypto.change24h >= 0 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {crypto.change24h >= 0 ? "+" : ""}{crypto.change24h.toFixed(2)}%
+                      </p>
+                    </div>
+                    <div className="col-span-1 flex justify-center">
+                      <Plus className="w-4 h-4 text-crypto-primary group-hover:text-crypto-primary/80 transition-colors" />
+                    </div>
                   </div>
                 ))}
                 {availableCryptos.length === 0 && searchTerm && (
@@ -353,6 +409,6 @@ export default function WatchlistPage() {
           </Card>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
