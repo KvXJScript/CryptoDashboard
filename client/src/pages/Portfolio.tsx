@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +8,7 @@ import CryptoIcon from "@/components/CryptoIcon";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { TrendingUp, TrendingDown, ArrowUp, ArrowDown, DollarSign, Wallet } from "lucide-react";
+import { TrendingUp, ArrowUp, ArrowDown, DollarSign, Wallet } from "lucide-react";
 
 interface PortfolioData {
   totalValue: number;

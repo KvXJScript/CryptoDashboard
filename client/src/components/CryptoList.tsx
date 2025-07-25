@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowUp, ArrowDown } from "lucide-react";
-import { useState } from "react";
 import CryptoIcon from "@/components/CryptoIcon";
 
 interface CryptoPrice {

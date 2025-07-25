@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Wallet, TrendingUp, DollarSign, ArrowUp, ArrowDown, Activity } from "lucide-react";
+import { Wallet, TrendingUp, DollarSign, ArrowUp, ArrowDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 
 interface PortfolioData {
   totalValue: number;
@@ -36,12 +35,6 @@ export default function DashboardStats() {
     const changeValue = (holding.value * holding.change24h) / 100;
     return total + changeValue;
   }, 0) || 0;
-
-  const portfolioPercentage = portfolio?.totalValue > 0 ? (todayPnL / portfolio.totalValue) * 100 : 0;
-  const totalInvested = 10000; // Initial portfolio value
-  const totalReturn = portfolio?.totalValue ? portfolio.totalValue - totalInvested : 0;
-  const totalReturnPercentage = totalInvested > 0 ? (totalReturn / totalInvested) * 100 : 0;
-  const portfolioDiversity = portfolio?.holdings.length || 0;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {

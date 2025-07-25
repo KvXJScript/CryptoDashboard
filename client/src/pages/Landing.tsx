@@ -79,7 +79,7 @@ export default function Landing() {
                 ))}
               </div>
               <div className="text-center z-10 mb-8">
-                <p className="text-3xl font-bold text-foreground mb-2 bg-gradient-to-r from-crypto-success to-crypto-primary bg-clip-text text-transparent">$24,891.45</p>
+                <p className="text-3xl font-bold text-foreground mb-2 bg-gradient-to-r from-crypto-success to-crypto-primary bg-clip-text">$24,891.45</p>
                 <p className="text-crypto-success flex items-center justify-center font-medium">
                   <TrendingUp className="w-5 h-5 mr-2" />
                   +5.2% Portfolio Growth

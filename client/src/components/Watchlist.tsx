@@ -51,28 +51,6 @@ export default function Watchlist() {
     return `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`;
   };
 
-  const getCryptoIcon = (symbol: string) => {
-    const icons: Record<string, string> = {
-      MATIC: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=24&h=24",
-      LINK: "https://images.unsplash.com/photo-1639322537228-f710d846310a?ixlib=rb-4.0.3&auto=format&fit=crop&w=24&h=24",
-      AVAX: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=24&h=24",
-    };
-    return icons[symbol] || "https://images.unsplash.com/photo-1605792657660-596af9009e82?ixlib=rb-4.0.3&auto=format&fit=crop&w=24&h=24";
-  };
-
-  const getCryptoName = (symbol: string) => {
-    const names: Record<string, string> = {
-      MATIC: "Polygon",
-      LINK: "Chainlink",
-      AVAX: "Avalanche",
-      BTC: "Bitcoin",
-      ETH: "Ethereum",
-      ADA: "Cardano",
-      SOL: "Solana",
-    };
-    return names[symbol] || symbol;
-  };
-
   const handleAddToWatchlist = () => {
     // In a real app, this would open a modal to select a crypto to add
     // For now, we'll add a random one from common cryptos
