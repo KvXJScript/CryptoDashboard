@@ -836,7 +836,7 @@ var vite_config_default = defineConfig({
     runtimeErrorOverlay(),
     await import("@replit/vite-plugin-cartographer").then((m) => m.cartographer())
   ],
-  base: "CryptoDashboard",
+  base: "/CryptoDashboard/",
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
