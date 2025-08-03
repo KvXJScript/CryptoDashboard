@@ -32,7 +32,7 @@ jobs:
       run: npm ci
 
     - name: Build for GitHub Pages
-      run: npm run build:github
+      run: npx vite build --config vite.config.github.ts
       env:
         VITE_BASE_PATH: /${{ github.event.repository.name }}
         VITE_COINGECKO_API_KEY: ${{ secrets.VITE_COINGECKO_API_KEY }}
