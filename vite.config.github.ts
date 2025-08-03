@@ -4,7 +4,7 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  base: "/CryptoDashboard/",
+  base: process.env.VITE_BASE_PATH || "/CryptoDashboard/",
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -16,6 +16,18 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-tabs'],
+          charts: ['recharts'],
+        },
+      },
+    },
+  },
+  define: {
+    __STATIC_DEPLOYMENT__: JSON.stringify(true),
   },
   server: {
     fs: {
