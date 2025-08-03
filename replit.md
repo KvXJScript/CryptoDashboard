@@ -137,6 +137,8 @@ Changelog:
 - August 3, 2025. Converted to frontend-only deployment compatible with GitHub Pages
 - August 3, 2025. Replaced backend authentication with localStorage-based mock system
 - August 3, 2025. Updated all components to use mock data and localStorage persistence
+- August 3, 2025. Fixed GitHub Pages deployment by removing authentication loading delay
+- August 3, 2025. Created clean production build without Replit cartographer dependencies
 - June 16, 2025. Initial setup
 ```
 
