@@ -18,10 +18,32 @@ export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Immediately set mock user for frontend-only deployment
-    setUser(mockUser);
-    setIsAuthenticated(true);
-    setIsLoading(false);
+    // Add timeout to ensure DOM is ready
+    const initAuth = () => {
+      try {
+        // Initialize demo data for static deployment
+        import("../lib/staticStorage").then(({ StaticStorageService }) => {
+          StaticStorageService.initializeDemoData(mockUser.id);
+        }).catch(console.error);
+
+        // Set mock user for frontend-only deployment
+        setUser(mockUser);
+        setIsAuthenticated(true);
+        setIsLoading(false);
+        
+        console.log("Authentication initialized successfully");
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        // Still set authenticated for demo purposes
+        setUser(mockUser);
+        setIsAuthenticated(true);
+        setIsLoading(false);
+      }
+    };
+
+    // Small delay to ensure proper initialization
+    const timer = setTimeout(initAuth, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return {

@@ -13,13 +13,7 @@ import Watchlist from "@/components/Watchlist";
 import TradingModal from "@/components/TradingModal";
 import { Home, PieChart, ArrowUpDown, Star } from "lucide-react";
 
-interface CryptoPrice {
-  symbol: string;
-  name: string;
-  price: number;
-  change24h: number;
-  coinGeckoId: string;
-}
+import type { CryptoPrice } from "@/hooks/useCryptoPrices";
 
 export default function Dashboard() {
   const { isAuthenticated, isLoading } = useAuth();

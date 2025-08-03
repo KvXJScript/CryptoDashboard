@@ -12,23 +12,28 @@ import Trade from "@/pages/Trade";
 import WatchlistPage from "@/pages/WatchlistPage";
 import FAQ from "@/pages/FAQ";
 import NotFound from "@/pages/not-found";
+import SimpleTest from "@/pages/SimpleTest";
 
 function Router() {
   const { isAuthenticated, isLoading, user, error } = useAuth();
 
-  // Authentication logic handles routing
+  console.log("Router state:", { isAuthenticated, isLoading, user: !!user, error });
 
   // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground text-xl">Loading Crypto Dashboard...</div>
+        <div className="text-center space-y-4">
+          <div className="text-foreground text-xl">Loading Crypto Dashboard...</div>
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
       </div>
     );
   }
 
   // Show error state if authentication fails
   if (error) {
+    console.error("Authentication error:", error);
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -39,20 +44,17 @@ function Router() {
     );
   }
 
+  // Temporarily use simple test page to diagnose issues
   return (
     <Switch>
-      {!isAuthenticated ? (
-        <Route component={Landing} />
-      ) : (
-        <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/portfolio" component={Portfolio} />
-          <Route path="/trade" component={Trade} />
-          <Route path="/watchlist" component={WatchlistPage} />
-          <Route path="/faq" component={FAQ} />
-        </>
-      )}
+      <Route path="/" component={Dashboard} />
+      <Route path="/test" component={SimpleTest} />
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/portfolio" component={Portfolio} />
+      <Route path="/trade" component={Trade} />
+      <Route path="/watchlist" component={WatchlistPage} />
+      <Route path="/faq" component={FAQ} />
+      <Route component={NotFound} />
     </Switch>
   );
 }
