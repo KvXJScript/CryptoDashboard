@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Router as WouterRouter } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -21,8 +21,20 @@ function Router() {
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground text-xl">Loading Crypto Dashboard...</div>
+      </div>
+    );
+  }
+
+  // Show error state if authentication fails
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-foreground text-xl mb-4">Welcome to Crypto Dashboard</div>
+          <div className="text-muted-foreground">Initializing demo environment...</div>
+        </div>
       </div>
     );
   }
@@ -46,12 +58,17 @@ function Router() {
 }
 
 function App() {
+  // Get base path for GitHub Pages routing
+  const basePath = import.meta.env.BASE_URL || '/';
+  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <Toaster />
-          <Router />
+          <WouterRouter base={basePath === '/' ? '' : basePath.slice(0, -1)}>
+            <Toaster />
+            <Router />
+          </WouterRouter>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
