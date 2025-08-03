@@ -46,10 +46,31 @@ export default function PriceChart() {
     queryKey: ["/api/portfolio"],
   });
 
+  // Use portfolio history for demo instead of API data
+  const { data: portfolioHistory } = useQuery({
+    queryKey: ["portfolio-history"],
+    queryFn: async () => {
+      const { StaticStorageService } = await import("@/lib/staticStorage");
+      return StaticStorageService.getPortfolioHistory();
+    },
+  });
+
   const { data: chartData, isLoading } = useQuery<HistoricalData[]>({
-    queryKey: [`/api/crypto/${selectedCrypto}/history`, activeTimeframe],
-    queryFn: () => fetch(`/api/crypto/${selectedCrypto}/history?days=${activeTimeframe}`).then(res => res.json()),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    queryKey: [`portfolio-performance`, selectedCrypto, activeTimeframe],
+    queryFn: () => {
+      // Generate chart data from portfolio history
+      if (!portfolioHistory || portfolioHistory.length === 0) {
+        return [];
+      }
+
+      return portfolioHistory.slice(-parseInt(activeTimeframe)).map((snapshot, index) => ({
+        timestamp: new Date(snapshot.createdAt).getTime(),
+        price: parseFloat(snapshot.totalValue),
+        volume: 1000000, // Mock volume
+      }));
+    },
+    enabled: !!portfolioHistory,
+    staleTime: 1000 * 60 * 5,
   });
 
   const [animatedData, setAnimatedData] = useState<HistoricalData[]>([]);

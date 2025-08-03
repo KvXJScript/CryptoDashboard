@@ -13,6 +13,8 @@ import WatchlistPage from "@/pages/WatchlistPage";
 import FAQ from "@/pages/FAQ";
 import NotFound from "@/pages/not-found";
 import SimpleTest from "@/pages/SimpleTest";
+import Deposit from "@/pages/Deposit";
+import Withdraw from "@/pages/Withdraw";
 
 function Router() {
   const { isAuthenticated, isLoading, user, error } = useAuth();
@@ -53,6 +55,8 @@ function Router() {
       <Route path="/portfolio" component={Portfolio} />
       <Route path="/trade" component={Trade} />
       <Route path="/watchlist" component={WatchlistPage} />
+      <Route path="/deposit" component={Deposit} />
+      <Route path="/withdraw" component={Withdraw} />
       <Route path="/faq" component={FAQ} />
       <Route component={NotFound} />
     </Switch>

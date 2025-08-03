@@ -24,6 +24,7 @@ export function useAuth() {
         // Initialize demo data for static deployment
         import("../lib/staticStorage").then(({ StaticStorageService }) => {
           StaticStorageService.initializeDemoData(mockUser.id);
+          StaticStorageService.generatePortfolioHistory(mockUser.id);
         }).catch(console.error);
 
         // Set mock user for frontend-only deployment

@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
-import { Moon, Sun, ChartLine, Menu, ChevronDown } from "lucide-react";
+import { Moon, Sun, ChartLine, Menu, ChevronDown, Plus, Minus } from "lucide-react";
 import type { User } from "@shared/schema";
 
 export default function Header() {
@@ -53,6 +53,22 @@ export default function Header() {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
+            {/* Deposit/Withdraw Buttons */}
+            <div className="hidden sm:flex items-center space-x-2">
+              <Link href="/deposit">
+                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                  <Plus className="h-4 w-4 mr-1" />
+                  Deposit
+                </Button>
+              </Link>
+              <Link href="/withdraw">
+                <Button size="sm" variant="outline" className="border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                  <Minus className="h-4 w-4 mr-1" />
+                  Withdraw
+                </Button>
+              </Link>
+            </div>
+
             {/* Theme Toggle */}
             <Button
               variant="ghost"

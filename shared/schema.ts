@@ -77,12 +77,42 @@ export const userBalance = pgTable("user_balance", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Deposits and withdrawals table
+export const deposits = pgTable("deposits", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  type: varchar("type").notNull(), // 'deposit' or 'withdrawal'
+  method: varchar("method").notNull(), // 'crypto', 'bank', 'card'
+  currency: varchar("currency").notNull(), // 'BTC', 'ETH', 'USD', 'PLN'
+  amount: decimal("amount", { precision: 18, scale: 8 }).notNull(),
+  blockchain: varchar("blockchain"), // For crypto: 'bitcoin', 'ethereum', 'polygon', 'bsc'
+  address: varchar("address"), // Wallet address for crypto
+  txHash: varchar("tx_hash"), // Transaction hash for crypto
+  bankDetails: jsonb("bank_details"), // Bank account details
+  status: varchar("status").notNull().default("pending"), // 'pending', 'completed', 'failed'
+  fee: decimal("fee", { precision: 18, scale: 8 }).default("0"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Portfolio history for performance tracking
+export const portfolioHistory = pgTable("portfolio_history", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  totalValue: decimal("total_value", { precision: 18, scale: 2 }).notNull(),
+  cashBalance: decimal("cash_balance", { precision: 18, scale: 2 }).notNull(),
+  holdings: jsonb("holdings").notNull(), // Snapshot of holdings
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   holdings: many(holdings),
   transactions: many(transactions),
   watchlist: many(watchlist),
   balance: one(userBalance),
+  deposits: many(deposits),
+  portfolioHistory: many(portfolioHistory),
 }));
 
 export const holdingsRelations = relations(holdings, ({ one }) => ({
@@ -113,6 +143,20 @@ export const userBalanceRelations = relations(userBalance, ({ one }) => ({
   }),
 }));
 
+export const depositsRelations = relations(deposits, ({ one }) => ({
+  user: one(users, {
+    fields: [deposits.userId],
+    references: [users.id],
+  }),
+}));
+
+export const portfolioHistoryRelations = relations(portfolioHistory, ({ one }) => ({
+  user: one(users, {
+    fields: [portfolioHistory.userId],
+    references: [users.id],
+  }),
+}));
+
 // Schema types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -123,13 +167,19 @@ export type Holding = typeof holdings.$inferSelect;
 export type InsertTransaction = typeof transactions.$inferInsert;
 export type Transaction = typeof transactions.$inferSelect;
 
-export type InsertWatchlist = typeof watchlist.$inferInsert;
+export type InsertWatchlistItem = typeof watchlist.$inferInsert;
 export type WatchlistItem = typeof watchlist.$inferSelect;
 
 export type InsertUserBalance = typeof userBalance.$inferInsert;
 export type UserBalance = typeof userBalance.$inferSelect;
 
-// Insert schemas
+export type InsertDeposit = typeof deposits.$inferInsert;
+export type Deposit = typeof deposits.$inferSelect;
+
+export type InsertPortfolioHistory = typeof portfolioHistory.$inferInsert;
+export type PortfolioHistory = typeof portfolioHistory.$inferSelect;
+
+// Zod schemas for validation
 export const insertHoldingSchema = createInsertSchema(holdings).omit({
   id: true,
   createdAt: true,
@@ -149,4 +199,14 @@ export const insertWatchlistSchema = createInsertSchema(watchlist).omit({
 export const insertUserBalanceSchema = createInsertSchema(userBalance).omit({
   id: true,
   updatedAt: true,
+});
+
+export const insertDepositSchema = createInsertSchema(deposits).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPortfolioHistorySchema = createInsertSchema(portfolioHistory).omit({
+  id: true,
+  createdAt: true,
 });

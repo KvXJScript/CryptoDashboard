@@ -5,7 +5,9 @@ import type {
   Holding, 
   Transaction, 
   WatchlistItem, 
-  UserBalance 
+  UserBalance,
+  Deposit,
+  PortfolioHistory
 } from "@shared/schema";
 
 const STORAGE_KEYS = {
@@ -13,6 +15,8 @@ const STORAGE_KEYS = {
   TRANSACTIONS: 'crypto-dashboard-transactions',
   WATCHLIST: 'crypto-dashboard-watchlist',
   BALANCE: 'crypto-dashboard-balance',
+  DEPOSITS: 'crypto-dashboard-deposits',
+  PORTFOLIO_HISTORY: 'crypto-dashboard-portfolio-history',
 } as const;
 
 export class StaticStorageService {
@@ -154,6 +158,108 @@ export class StaticStorageService {
     }
     
     this.set(STORAGE_KEYS.BALANCE, balances);
+  }
+
+  // Deposits and withdrawals management
+  static getDeposits(): Deposit[] {
+    return this.get(STORAGE_KEYS.DEPOSITS, []);
+  }
+
+  static saveDeposits(deposits: Deposit[]): void {
+    this.set(STORAGE_KEYS.DEPOSITS, deposits);
+  }
+
+  static addDeposit(deposit: Omit<Deposit, 'id' | 'createdAt'>): Deposit {
+    const deposits = this.getDeposits();
+    const newDeposit: Deposit = {
+      ...deposit,
+      id: Date.now(),
+      createdAt: new Date(),
+    };
+    
+    deposits.unshift(newDeposit);
+    this.saveDeposits(deposits);
+    
+    // Auto-complete after 1 minute for demo
+    setTimeout(() => {
+      this.completeDeposit(newDeposit.id);
+    }, 60000);
+    
+    return newDeposit;
+  }
+
+  static completeDeposit(depositId: number): void {
+    const deposits = this.getDeposits();
+    const depositIndex = deposits.findIndex(d => d.id === depositId);
+    
+    if (depositIndex >= 0) {
+      deposits[depositIndex] = {
+        ...deposits[depositIndex],
+        status: "completed",
+        completedAt: new Date(),
+      };
+      this.saveDeposits(deposits);
+    }
+  }
+
+  // Portfolio history management
+  static getPortfolioHistory(): PortfolioHistory[] {
+    return this.get(STORAGE_KEYS.PORTFOLIO_HISTORY, []);
+  }
+
+  static savePortfolioHistory(history: PortfolioHistory[]): void {
+    this.set(STORAGE_KEYS.PORTFOLIO_HISTORY, history);
+  }
+
+  static addPortfolioSnapshot(userId: string, totalValue: string, cashBalance: string, holdings: any[]): void {
+    const history = this.getPortfolioHistory();
+    const snapshot: PortfolioHistory = {
+      id: Date.now(),
+      userId,
+      totalValue,
+      cashBalance,
+      holdings,
+      createdAt: new Date(),
+    };
+    
+    history.push(snapshot);
+    
+    // Keep only last 100 snapshots for performance
+    if (history.length > 100) {
+      history.shift();
+    }
+    
+    this.savePortfolioHistory(history);
+  }
+
+  // Generate historical portfolio data for demo
+  static generatePortfolioHistory(userId: string): void {
+    const existing = this.getPortfolioHistory();
+    if (existing.length > 0) return; // Don't regenerate if data exists
+    
+    const history: PortfolioHistory[] = [];
+    const now = new Date();
+    
+    // Generate 30 days of historical data
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
+      const baseValue = 41000;
+      const variance = (Math.random() - 0.5) * 2000; // ±1000 variance
+      const totalValue = baseValue + variance + (i * 10); // Slight upward trend
+      
+      const snapshot: PortfolioHistory = {
+        id: Date.now() + i,
+        userId,
+        totalValue: totalValue.toString(),
+        cashBalance: "5000.00",
+        holdings: [],
+        createdAt: date,
+      };
+      
+      history.push(snapshot);
+    }
+    
+    this.savePortfolioHistory(history);
   }
 
   // Initialize demo data
