@@ -60,14 +60,11 @@ function Router() {
 }
 
 function App() {
-  // Get base path for GitHub Pages routing
-  const basePath = import.meta.env.BASE_URL || '/';
-  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <WouterRouter base={basePath === '/' ? '' : basePath.slice(0, -1)}>
+          <WouterRouter>
             <Toaster />
             <Router />
           </WouterRouter>
