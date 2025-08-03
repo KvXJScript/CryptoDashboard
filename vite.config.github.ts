@@ -4,7 +4,7 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  base: "./",
+  base: "/CryptoDashboard/",
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),

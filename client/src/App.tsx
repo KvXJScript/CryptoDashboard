@@ -60,11 +60,15 @@ function Router() {
 }
 
 function App() {
+  // Fix GitHub Pages routing by detecting the base path
+  const isGitHubPages = window.location.hostname === 'kvxjscript.github.io';
+  const basePath = isGitHubPages ? '/CryptoDashboard' : '';
+  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <WouterRouter>
+          <WouterRouter base={basePath}>
             <Toaster />
             <Router />
           </WouterRouter>
