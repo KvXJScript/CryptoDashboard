@@ -18,14 +18,10 @@ export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Simulate loading and auto-login for demo
-    const timer = setTimeout(() => {
-      setUser(mockUser);
-      setIsAuthenticated(true);
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
+    // Immediately set mock user for frontend-only deployment
+    setUser(mockUser);
+    setIsAuthenticated(true);
+    setIsLoading(false);
   }, []);
 
   return {

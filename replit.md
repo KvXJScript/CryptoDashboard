@@ -133,6 +133,10 @@ CryptoTracker is a modern full-stack cryptocurrency portfolio management applica
 
 ```
 Changelog:
+- August 3, 2025. Successfully migrated from Replit Agent to Replit environment
+- August 3, 2025. Converted to frontend-only deployment compatible with GitHub Pages
+- August 3, 2025. Replaced backend authentication with localStorage-based mock system
+- August 3, 2025. Updated all components to use mock data and localStorage persistence
 - June 16, 2025. Initial setup
 ```
 
