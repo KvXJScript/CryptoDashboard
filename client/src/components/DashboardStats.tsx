@@ -1,40 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Wallet, TrendingUp, DollarSign, ArrowUp, ArrowDown } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-
-interface PortfolioData {
-  totalValue: number;
-  availableCash: number;
-  holdings: Array<{
-    symbol: string;
-    amount: string;
-    currentPrice: number;
-    value: number;
-    change24h: number;
-  }>;
-}
+import { usePortfolio, useUserBalance } from "@/hooks/usePortfolio";
+import { useCryptoPrices } from "@/hooks/useCryptoPrices";
 
 export default function DashboardStats() {
-  const { data: portfolio, isLoading } = useQuery<PortfolioData>({
-    queryKey: ["/api/portfolio"],
-  });
-
-  const { data: transactions } = useQuery({
-    queryKey: ["/api/transactions", 1],
-    queryFn: async () => {
-      const response = await fetch("/api/transactions?limit=1", {
-        credentials: "include",
-      });
-      if (!response.ok) throw new Error("Failed to fetch transactions");
-      return response.json();
-    },
-  });
-
-  // Calculate comprehensive portfolio metrics
-  const todayPnL = portfolio?.holdings.reduce((total, holding) => {
-    const changeValue = (holding.value * holding.change24h) / 100;
-    return total + changeValue;
-  }, 0) || 0;
+  const { data: holdings, isLoading: holdingsLoading } = usePortfolio();
+  const { data: userBalance } = useUserBalance();
+  const { data: cryptoPrices } = useCryptoPrices();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -46,16 +18,12 @@ export default function DashboardStats() {
   };
 
   const getChangeColor = (change: number) => {
-    if (change > 0) return "text-green-400"; // Bright green for positive
-    if (change < 0) return "text-red-400"; // Light red for negative
-    return "text-gray-400"; // Neutral for zero
+    if (change > 0) return "text-green-400";
+    if (change < 0) return "text-red-400";
+    return "text-gray-400";
   };
 
-  const formatPercent = (value: number) => {
-    return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
-  };
-
-  if (isLoading) {
+  if (holdingsLoading) {
     return (
       <div className="mb-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -73,77 +41,73 @@ export default function DashboardStats() {
     );
   }
 
+  // Calculate portfolio metrics
+  const portfolioData = holdings ? holdings.map(holding => {
+    const cryptoPrice = cryptoPrices?.find(p => p.symbol === holding.symbol);
+    const currentPrice = cryptoPrice?.price || 0;
+    const amount = parseFloat(holding.amount);
+    const value = amount * currentPrice;
+    
+    return {
+      value,
+      change24h: cryptoPrice?.change24h || 0,
+    };
+  }) : [];
+
+  const totalValue = portfolioData.reduce((sum, item) => sum + item.value, 0);
+  const availableCash = userBalance ? parseFloat(userBalance.balance) : 0;
+  const todayPnL = portfolioData.reduce((total, item) => {
+    const changeValue = (item.value * item.change24h) / 100;
+    return total + changeValue;
+  }, 0);
+
   return (
     <div className="mb-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Portfolio Value */}
-        <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/5 via-background to-background">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Portfolio Value
-              </h3>
-              <Wallet className="w-5 h-5 text-crypto-primary" />
-            </div>
-            <div className="space-y-2">
-              <p className="text-2xl font-bold text-foreground">
-                {formatCurrency(portfolio?.totalValue || 0)}
-              </p>
-              <p className={`text-sm flex items-center ${getChangeColor(todayPnL)}`}>
-                {todayPnL >= 0 ? (
-                  <ArrowUp className="w-3 h-3 mr-1" />
-                ) : (
-                  <ArrowDown className="w-3 h-3 mr-1" />
-                )}
-                <span>
-                  {formatCurrency(Math.abs(todayPnL))} ({formatPercent(((todayPnL / (portfolio?.totalValue || 1)) * 100))})
-                </span>
-              </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Portfolio</p>
+                <p className="text-2xl font-bold">{formatCurrency(totalValue)}</p>
+                <p className={`text-sm ${getChangeColor(todayPnL)}`}>
+                  {todayPnL >= 0 ? <ArrowUp className="inline w-3 h-3 mr-1" /> : <ArrowDown className="inline w-3 h-3 mr-1" />}
+                  {formatCurrency(Math.abs(todayPnL))} today
+                </p>
+              </div>
+              <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
+                <Wallet className="h-6 w-6 text-primary" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Today's P&L */}
-        <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
+        <Card className="border-0 shadow-lg">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Today's P&L
-              </h3>
-              <TrendingUp className={`w-5 h-5 ${getChangeColor(todayPnL)}`} />
-            </div>
-            <div className="space-y-2">
-              <p className={`text-2xl font-bold ${getChangeColor(todayPnL)}`}>
-                {todayPnL >= 0 ? "+" : ""}{formatCurrency(todayPnL)}
-              </p>
-              <p className={`text-sm flex items-center ${getChangeColor(todayPnL)}`}>
-                {todayPnL >= 0 ? (
-                  <ArrowUp className="w-3 h-3 mr-1" />
-                ) : (
-                  <ArrowDown className="w-3 h-3 mr-1" />
-                )}
-                <span>{formatPercent(((todayPnL / (portfolio?.totalValue || 1)) * 100))} from yesterday</span>
-              </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Available Cash</p>
+                <p className="text-2xl font-bold">{formatCurrency(availableCash)}</p>
+                <p className="text-sm text-muted-foreground">Ready to invest</p>
+              </div>
+              <div className="h-12 w-12 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Available Cash */}
-        <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
+        <Card className="border-0 shadow-lg">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Available Cash
-              </h3>
-              <DollarSign className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-2">
-              <p className="text-2xl font-bold text-foreground">
-                {formatCurrency(portfolio?.availableCash || 0)}
-              </p>
-              <button className="text-sm text-crypto-primary hover:text-crypto-primary/80 transition-colors">
-                Add funds
-              </button>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Assets</p>
+                <p className="text-2xl font-bold">{formatCurrency(totalValue + availableCash)}</p>
+                <p className="text-sm text-muted-foreground">All holdings + cash</p>
+              </div>
+              <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -3,20 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
+import { useTradeMutation, usePortfolio, useUserBalance } from "@/hooks/usePortfolio";
+import { type CryptoPrice } from "@/hooks/useCryptoPrices";
 import CryptoIcon from "@/components/CryptoIcon";
 import { ArrowUp, ArrowDown, TrendingUp, TrendingDown } from "lucide-react";
-
-interface CryptoPrice {
-  symbol: string;
-  name: string;
-  price: number;
-  change24h: number;
-  coinGeckoId: string;
-}
 
 interface TradingModalProps {
   isOpen: boolean;
@@ -25,315 +16,190 @@ interface TradingModalProps {
   tradeType: "buy" | "sell";
 }
 
-interface PortfolioData {
-  totalValue: number;
-  availableCash: number;
-  holdings: Array<{
-    symbol: string;
-    amount: string;
-    currentPrice: number;
-    value: number;
-    change24h: number;
-  }>;
-}
-
 export default function TradingModal({ isOpen, onClose, crypto, tradeType }: TradingModalProps) {
   const [amount, setAmount] = useState("");
   const [activeTradeType, setActiveTradeType] = useState<"buy" | "sell">(tradeType);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const { data: portfolio } = useQuery<PortfolioData>({
-    queryKey: ["/api/portfolio"],
-  });
+  const tradeMutation = useTradeMutation();
+  const { data: holdings } = usePortfolio();
+  const { data: userBalance } = useUserBalance();
 
   useEffect(() => {
     setActiveTradeType(tradeType);
   }, [tradeType]);
 
-  const tradeMutation = useMutation({
-    mutationFn: async (tradeData: {
-      symbol: string;
-      type: "buy" | "sell";
-      amount: string;
-      price: string;
-    }) => {
-      await apiRequest("POST", "/api/trade", tradeData);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Trade Successful",
-        description: `Successfully ${activeTradeType === "buy" ? "bought" : "sold"} ${crypto?.symbol}`,
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/portfolio"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      onClose();
+  useEffect(() => {
+    if (!isOpen) {
       setAmount("");
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    }
+  }, [isOpen]);
+
+  if (!crypto) return null;
+
+  const availableCash = userBalance ? parseFloat(userBalance.balance) : 0;
+  const holding = holdings?.find(h => h.symbol === crypto.symbol);
+  const availableAmount = holding ? parseFloat(holding.amount) : 0;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!amount || parseFloat(amount) <= 0) {
       toast({
-        title: "Trade Failed",
-        description: error.message || "Failed to execute trade",
+        title: "Invalid Amount",
+        description: "Please enter a valid amount",
         variant: "destructive",
       });
-    },
-  });
+      return;
+    }
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const calculateCryptoAmount = () => {
-    if (!crypto || !amount) return 0;
-    const usdAmount = parseFloat(amount);
-    if (isNaN(usdAmount)) return 0;
-    return usdAmount / crypto.price;
-  };
-
-  const calculateTotal = () => {
-    if (!crypto || !amount) return 0;
-    const usdAmount = parseFloat(amount);
-    if (isNaN(usdAmount)) return 0;
-    return usdAmount; // This should be the USD amount entered, not multiplied by price
-  };
-
-  const calculateFee = () => {
-    const total = calculateTotal();
-    return total * 0.001; // 0.1% fee
-  };
-
-  const calculateFinalTotal = () => {
-    const total = calculateTotal();
-    const fee = calculateFee();
-    return activeTradeType === "buy" ? total + fee : total - fee;
-  };
-
-  const getCurrentHolding = () => {
-    if (!crypto || !portfolio) return 0;
-    const holding = portfolio.holdings.find(h => h.symbol === crypto.symbol);
-    return holding ? parseFloat(holding.amount) : 0;
-  };
-
-  const canExecuteTrade = () => {
-    if (!crypto || !amount) return false;
-    const amountNum = parseFloat(amount);
-    if (isNaN(amountNum) || amountNum <= 0) return false;
+    const total = parseFloat(amount) * crypto.price;
+    const fee = total * 0.005; // 0.5% fee
 
     if (activeTradeType === "buy") {
-      return portfolio && parseFloat(amount) <= portfolio.availableCash;
+      if (total + fee > availableCash) {
+        toast({
+          title: "Insufficient Funds",
+          description: "You don't have enough cash for this purchase",
+          variant: "destructive",
+        });
+        return;
+      }
     } else {
-      const currentHolding = getCurrentHolding();
-      const cryptoAmount = calculateCryptoAmount();
-      return cryptoAmount <= currentHolding;
+      if (parseFloat(amount) > availableAmount) {
+        toast({
+          title: "Insufficient Holdings",
+          description: "You don't have enough of this cryptocurrency to sell",
+          variant: "destructive",
+        });
+        return;
+      }
     }
-  };
 
-  const handleTrade = () => {
-    if (!crypto || !amount || !canExecuteTrade()) return;
-
-    const cryptoAmount = calculateCryptoAmount();
     tradeMutation.mutate({
       symbol: crypto.symbol,
       type: activeTradeType,
-      amount: cryptoAmount.toString(),
+      amount,
       price: crypto.price.toString(),
     });
   };
 
-  const handleClose = () => {
-    onClose();
-    setAmount("");
-  };
-
-  if (!crypto) return null;
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: price < 1 ? 6 : 2,
-    }).format(price);
-  };
-
-  const formatPercent = (change: number) => {
-    return `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
-  };
+  const total = parseFloat(amount || "0") * crypto.price;
+  const fee = total * 0.005;
+  const finalTotal = activeTradeType === "buy" ? total + fee : total - fee;
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-w-lg bg-card/95 backdrop-blur-xl border-border/40">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center">
-            <div className="flex flex-col items-center space-y-4 p-2">
-              <div className="flex items-center space-x-4">
-                <CryptoIcon 
-                  coinId={crypto.coinGeckoId}
-                  symbol={crypto.symbol}
-                  size="lg"
-                  className="ring-2 ring-border/30 shadow-lg"
-                />
-                <div className="text-left">
-                  <div className="text-2xl font-bold text-foreground">{crypto.name}</div>
-                  <div className="text-sm font-medium text-muted-foreground font-mono">{crypto.symbol}</div>
-                </div>
+          <DialogTitle className="flex items-center space-x-3">
+            <CryptoIcon symbol={crypto.symbol} size={32} />
+            <div>
+              <div className="text-left">
+                {activeTradeType === "buy" ? "Buy" : "Sell"} {crypto.name}
               </div>
-              
-              <div className="bg-muted/30 rounded-xl p-4 w-full">
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-semibold text-foreground">{formatPrice(crypto.price)}</span>
-                  <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${
-                    crypto.change24h >= 0 
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
-                      : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                  }`}>
-                    {crypto.change24h >= 0 ? (
-                      <TrendingUp className="w-4 h-4" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4" />
-                    )}
-                    <span>{formatPercent(crypto.change24h)}</span>
-                  </div>
-                </div>
+              <div className="text-sm text-muted-foreground font-normal">
+                ${crypto.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                <span className={`ml-2 ${crypto.change24h >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {crypto.change24h >= 0 ? '+' : ''}{crypto.change24h.toFixed(2)}%
+                </span>
               </div>
             </div>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Trade Type Toggle */}
-          <div className="flex bg-muted rounded-xl p-1">
+        <div className="space-y-4">
+          <div className="flex space-x-2">
             <Button
-              variant="ghost"
-              className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                activeTradeType === "buy"
-                  ? "bg-green-600 dark:bg-green-500 text-white shadow-lg"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-              }`}
+              type="button"
+              variant={activeTradeType === "buy" ? "default" : "outline"}
+              className="flex-1"
               onClick={() => setActiveTradeType("buy")}
             >
-              <TrendingUp className="w-4 h-4 mr-2" />
               Buy
             </Button>
             <Button
-              variant="ghost"
-              className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                activeTradeType === "sell"
-                  ? "bg-red-600 dark:bg-red-500 text-white shadow-lg"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-              }`}
+              type="button"
+              variant={activeTradeType === "sell" ? "default" : "outline"}
+              className="flex-1"
               onClick={() => setActiveTradeType("sell")}
+              disabled={!holding || availableAmount === 0}
             >
-              <TrendingDown className="w-4 h-4 mr-2" />
               Sell
             </Button>
           </div>
 
-          {/* Amount Input */}
-          <div>
-            <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Amount (USD)
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                $
-              </span>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="amount">Amount ({crypto.symbol})</Label>
               <Input
+                id="amount"
                 type="number"
-                className="pl-8"
-                placeholder="0.00"
+                step="any"
+                min="0"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                step="0.01"
-                min="0"
+                placeholder={`Enter ${crypto.symbol} amount`}
+                required
               />
-            </div>
-            {amount && (
-              <p className="text-sm text-gray-500 mt-2">
-                ≈ {calculateCryptoAmount().toFixed(crypto.symbol === "BTC" ? 8 : 6)} {crypto.symbol}
-              </p>
-            )}
-          </div>
-
-          {/* Current Holdings (for sell) */}
-          {activeTradeType === "sell" && (
-            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Current Holdings: {getCurrentHolding().toFixed(crypto.symbol === "BTC" ? 8 : 4)} {crypto.symbol}
-              </p>
-            </div>
-          )}
-
-          {/* Available Cash (for buy) */}
-          {activeTradeType === "buy" && portfolio && (
-            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Available Cash: {formatCurrency(portfolio.availableCash)}
-              </p>
-            </div>
-          )}
-
-          {/* Order Summary */}
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Current Price</span>
-              <span>{formatCurrency(crypto.price)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Subtotal</span>
-              <span>{formatCurrency(calculateTotal())}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Fee (0.1%)</span>
-              <span>{formatCurrency(calculateFee())}</span>
-            </div>
-            <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
-              <div className="flex justify-between font-medium">
-                <span>Total</span>
-                <span>{formatCurrency(calculateFinalTotal())}</span>
+              <div className="text-sm text-muted-foreground mt-1">
+                {activeTradeType === "buy" 
+                  ? `Available cash: $${availableCash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : `Available: ${availableAmount.toFixed(6)} ${crypto.symbol}`
+                }
               </div>
             </div>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex space-x-3">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={handleClose}
-            >
-              Cancel
-            </Button>
-            <Button
-              className={`flex-1 ${
-                activeTradeType === "buy"
-                  ? "bg-crypto-success hover:bg-crypto-success/80"
-                  : "bg-crypto-danger hover:bg-crypto-danger/80"
-              } text-white`}
-              onClick={handleTrade}
-              disabled={!canExecuteTrade() || tradeMutation.isPending}
-            >
-              {tradeMutation.isPending
-                ? "Processing..."
-                : `${activeTradeType === "buy" ? "Buy" : "Sell"} ${crypto.symbol}`}
-            </Button>
-          </div>
+            {amount && parseFloat(amount) > 0 && (
+              <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Amount:</span>
+                  <span>{parseFloat(amount).toFixed(6)} {crypto.symbol}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Price:</span>
+                  <span>${crypto.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Subtotal:</span>
+                  <span>${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Fee (0.5%):</span>
+                  <span>${fee.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <hr className="border-muted-foreground/20" />
+                <div className="flex justify-between font-medium">
+                  <span>Total:</span>
+                  <span className={activeTradeType === "buy" ? "text-red-600" : "text-green-600"}>
+                    {activeTradeType === "buy" ? "-" : "+"}${Math.abs(finalTotal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex space-x-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="flex-1"
+                disabled={tradeMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className={`flex-1 ${
+                  activeTradeType === "buy" 
+                    ? "bg-green-600 hover:bg-green-700" 
+                    : "bg-red-600 hover:bg-red-700"
+                }`}
+                disabled={tradeMutation.isPending || !amount || parseFloat(amount) <= 0}
+              >
+                {tradeMutation.isPending ? "Processing..." : `${activeTradeType === "buy" ? "Buy" : "Sell"} ${crypto.symbol}`}
+              </Button>
+            </div>
+          </form>
         </div>
       </DialogContent>
     </Dialog>

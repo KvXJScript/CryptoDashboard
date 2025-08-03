@@ -1,21 +1,37 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import type { User } from "@shared/schema";
 
-export function useAuth() {
-  const { data: user, isLoading, error } = useQuery<User>({
-    queryKey: ["/api/auth/user"],
-    retry: false,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+// Mock user for demo purposes
+const mockUser: User = {
+  id: "demo-user-1",
+  email: "demo@cryptotracker.com",
+  firstName: "Demo",
+  lastName: "User",
+  profileImageUrl: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
 
-  // Consider user authenticated if we have user data
-  const isAuthenticated = true;
+export function useAuth() {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Simulate loading and auto-login for demo
+    const timer = setTimeout(() => {
+      setUser(mockUser);
+      setIsAuthenticated(true);
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return {
     user,
     isLoading,
     isAuthenticated,
-    error,
+    error: null,
   };
 }
