@@ -1,23 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { useTransactions } from "@/hooks/usePortfolio";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-interface Transaction {
-  id: number;
-  symbol: string;
-  type: "buy" | "sell";
-  amount: string;
-  price: string;
-  total: string;
-  fee: string;
-  createdAt: string;
-}
-
 export default function RecentTransactions() {
-  const { data: transactions, isLoading } = useQuery<Transaction[]>({
-    queryKey: ["/api/transactions"],
-  });
+  const { data: transactions, isLoading } = useTransactions();
 
   const formatCurrency = (value: string | number) => {
     const num = typeof value === "string" ? parseFloat(value) : value;
@@ -75,58 +62,47 @@ export default function RecentTransactions() {
             <h3 className="text-lg font-semibold">Recent Transactions</h3>
           </div>
           <div className="text-center py-8">
-            <p className="text-gray-500">No transactions yet</p>
-            <p className="text-sm text-gray-400 mt-2">Your trading history will appear here</p>
+            <p className="text-muted-foreground">No transactions yet</p>
+            <p className="text-sm text-muted-foreground mt-2">Start trading to see your transaction history</p>
           </div>
         </CardContent>
       </Card>
     );
   }
 
+  const recentTransactions = transactions.slice(0, 5);
+
   return (
     <Card>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold">Recent Transactions</h3>
-          <button className="text-sm text-crypto-primary hover:underline">
-            View all
-          </button>
         </div>
-
         <div className="space-y-4">
-          {transactions.map((transaction) => (
+          {recentTransactions.map((transaction) => (
             <div key={transaction.id} className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    transaction.type === "buy"
-                      ? "bg-green-400/20"
-                      : "bg-red-400/20"
-                  }`}
-                >
+                <div className={`p-2 rounded-full ${
+                  transaction.type === "buy" ? "bg-green-100 dark:bg-green-900/20" : "bg-red-100 dark:bg-red-900/20"
+                }`}>
                   {transaction.type === "buy" ? (
-                    <ArrowUp className="text-green-400 text-xs w-4 h-4" />
+                    <ArrowUp className="h-4 w-4 text-green-600 dark:text-green-400" />
                   ) : (
-                    <ArrowDown className="text-red-400 text-xs w-4 h-4" />
+                    <ArrowDown className="h-4 w-4 text-red-600 dark:text-red-400" />
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-medium">
+                  <p className="font-medium">
                     {transaction.type === "buy" ? "Bought" : "Sold"} {transaction.symbol}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {formatDistanceToNow(new Date(transaction.createdAt), {
-                      addSuffix: true,
-                    })}
+                  <p className="text-sm text-muted-foreground">
+                    {formatDistanceToNow(new Date(transaction.createdAt), { addSuffix: true })}
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className={`text-sm font-medium ${getTransactionColor(transaction.type)}`}>
-                  {transaction.type === "buy" ? "+" : "-"}
-                  {formatAmount(transaction.amount, transaction.symbol)}
-                </p>
-                <p className="text-xs text-gray-500">
+                <p className="font-medium">{formatAmount(transaction.amount, transaction.symbol)}</p>
+                <p className={`text-sm ${getTransactionColor(transaction.type)}`}>
                   {formatCurrency(transaction.total)}
                 </p>
               </div>

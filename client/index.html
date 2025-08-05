@@ -3,11 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Crypto Dashboard - Real-time Trading & Portfolio Management</title>
+    <meta name="description" content="Professional cryptocurrency dashboard with real-time prices, portfolio tracking, and trading simulation. Track Bitcoin, Ethereum, and more." />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" />
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Crypto Dashboard - Real-time Trading & Portfolio Management" />
+    <meta property="og:description" content="Professional cryptocurrency dashboard with real-time prices, portfolio tracking, and trading simulation." />
+    <meta property="og:url" content="https://kvxjscript.github.io/CryptoDashboard/" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Crypto Dashboard" />
+    <meta name="twitter:description" content="Professional cryptocurrency dashboard with real-time prices and portfolio tracking." />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#1a1a1a" />
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://api.coingecko.com" />
+    
+    <!-- SPA routing support for GitHub Pages -->
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // https://github.com/rafgraph/spa-github-pages
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
   </body>
 </html>

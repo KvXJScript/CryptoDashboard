@@ -13,16 +13,10 @@ import Watchlist from "@/components/Watchlist";
 import TradingModal from "@/components/TradingModal";
 import { Home, PieChart, ArrowUpDown, Star } from "lucide-react";
 
-interface CryptoPrice {
-  symbol: string;
-  name: string;
-  price: number;
-  change24h: number;
-  coinGeckoId: string;
-}
+import type { CryptoPrice } from "@/hooks/useCryptoPrices";
 
 export default function Dashboard() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [tradingModalOpen, setTradingModalOpen] = useState(false);
   const [selectedCrypto, setSelectedCrypto] = useState<CryptoPrice | null>(null);
@@ -36,32 +30,7 @@ export default function Dashboard() {
     setTradingModalOpen(true);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-crypto-dark">
-        <div className="animate-pulse">
-          <div className="h-16 bg-white dark:bg-crypto-card-dark border-b"></div>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-white dark:bg-crypto-card-dark rounded-2xl"></div>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8">
-                <div className="h-96 bg-white dark:bg-crypto-card-dark rounded-2xl"></div>
-                <div className="h-64 bg-white dark:bg-crypto-card-dark rounded-2xl"></div>
-              </div>
-              <div className="space-y-6">
-                <div className="h-64 bg-white dark:bg-crypto-card-dark rounded-2xl"></div>
-                <div className="h-48 bg-white dark:bg-crypto-card-dark rounded-2xl"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   // Dashboard content (authentication is handled by router)
 

@@ -66,11 +66,29 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-gray-200 dark:border-gray-800;
   }
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    /* Prevent white flash on navigation */
+    background-color: hsl(240, 10%, 3.9%) !important;
+  }
+
+  html {
+    /* Prevent white flash on initial load */
+    background-color: hsl(240, 10%, 3.9%) !important;
+  }
+
+  /* Smooth transitions for components */
+  .smooth-transition {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Prevent flash on page navigation */
+  .page-container {
+    min-height: 100vh;
+    background-color: inherit;
   }
 }
 

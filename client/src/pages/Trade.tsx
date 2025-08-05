@@ -2,35 +2,15 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useCryptoPrices, type CryptoPrice } from "@/hooks/useCryptoPrices";
+import { usePortfolio, useUserBalance } from "@/hooks/usePortfolio";
 import Header from "@/components/Header";
-import CryptoList from "@/components/CryptoList";
 import TradingModal from "@/components/TradingModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useQuery } from "@tanstack/react-query";
 import { Search, TrendingUp, TrendingDown } from "lucide-react";
 import CryptoIcon from "@/components/CryptoIcon";
-
-interface CryptoPrice {
-  symbol: string;
-  name: string;
-  price: number;
-  change24h: number;
-  coinGeckoId: string;
-}
-
-interface PortfolioData {
-  totalValue: number;
-  availableCash: number;
-  holdings: Array<{
-    symbol: string;
-    amount: string;
-    currentPrice: number;
-    value: number;
-    change24h: number;
-  }>;
-}
 
 export default function Trade() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -40,14 +20,9 @@ export default function Trade() {
   const [selectedCrypto, setSelectedCrypto] = useState<CryptoPrice | null>(null);
   const [tradeType, setTradeType] = useState<"buy" | "sell">("buy");
 
-  const { data: cryptos, isLoading: cryptosLoading } = useQuery<CryptoPrice[]>({
-    queryKey: ["/api/crypto/prices"],
-    refetchInterval: 30000,
-  });
-
-  const { data: portfolio } = useQuery<PortfolioData>({
-    queryKey: ["/api/portfolio"],
-  });
+  const { data: cryptos, isLoading: cryptosLoading } = useCryptoPrices();
+  const { data: holdings } = usePortfolio();
+  const { data: userBalance } = useUserBalance();
 
   if (isLoading) {
     return (
@@ -67,15 +42,7 @@ export default function Trade() {
   }
 
   if (!isAuthenticated) {
-    toast({
-      title: "Unauthorized",
-      description: "You are logged out. Logging in again...",
-      variant: "destructive",
-    });
-    setTimeout(() => {
-      window.location.href = "/api/login";
-    }, 500);
-    return null;
+    return null; // Authentication handled by router
   }
 
   const handleTrade = (crypto: CryptoPrice, type: "buy" | "sell") => {
@@ -84,247 +51,157 @@ export default function Trade() {
     setTradingModalOpen(true);
   };
 
-  const filteredCryptos = cryptos?.filter((crypto) =>
-    crypto.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    crypto.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCryptos = cryptos?.filter(crypto =>
+    crypto.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    crypto.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
+  const availableCash = userBalance ? parseFloat(userBalance.balance) : 0;
 
-  const getChangeColor = (change: number) => {
-    if (change > 0) return "text-green-400"; // Bright green for positive
-    if (change < 0) return "text-red-400"; // Light red for negative
-    return "text-gray-400"; // Neutral for zero
-  };
-
-  const topGainers = cryptos?.filter(c => c.change24h > 0).sort((a, b) => b.change24h - a.change24h).slice(0, 3) || [];
-  const topLosers = cryptos?.filter(c => c.change24h < 0).sort((a, b) => a.change24h - b.change24h).slice(0, 3) || [];
+  // Check if user has holdings for each crypto
+  const cryptosWithHoldings = filteredCryptos.map(crypto => {
+    const holding = holdings?.find(h => h.symbol === crypto.symbol);
+    return {
+      ...crypto,
+      hasHolding: !!holding,
+      holdingAmount: holding ? parseFloat(holding.amount) : 0,
+    };
+  });
 
   return (
-    <motion.div 
-      className="min-h-screen bg-background text-foreground"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Trade</h1>
-          <p className="text-muted-foreground">Buy and sell cryptocurrencies with live market data</p>
-        </div>
-
-        {/* Quick Stats */}
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
+          className="mb-8"
         >
-          <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-muted-foreground">Available Cash</h3>
-                <div className="w-8 h-8 bg-crypto-success/20 rounded-full flex items-center justify-center">
-                  <span className="text-crypto-success text-xs font-semibold">$</span>
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-foreground">
-                {formatCurrency(portfolio?.availableCash || 0)}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-muted-foreground">Top Gainer</h3>
-                <TrendingUp className="w-5 h-5 text-green-400" />
-              </div>
-              {topGainers[0] ? (
-                <div>
-                  <p className="text-lg font-bold text-foreground">{topGainers[0].symbol}</p>
-                  <p className={`text-sm ${getChangeColor(topGainers[0].change24h)}`}>+{topGainers[0].change24h.toFixed(2)}%</p>
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No data</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-muted-foreground">Top Loser</h3>
-                <TrendingDown className="w-5 h-5 text-red-400" />
-              </div>
-              {topLosers[0] ? (
-                <div>
-                  <p className="text-lg font-bold text-foreground">{topLosers[0].symbol}</p>
-                  <p className={`text-sm ${getChangeColor(topLosers[0].change24h)}`}>{topLosers[0].change24h.toFixed(2)}%</p>
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No data</p>
-              )}
-            </CardContent>
-          </Card>
+          <h1 className="text-3xl font-bold mb-2">Trade</h1>
+          <p className="text-muted-foreground">Buy and sell cryptocurrencies</p>
+          <div className="mt-4 text-sm text-muted-foreground">
+            Available Balance: <span className="font-semibold text-primary">${availableCash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          </div>
         </motion.div>
 
-        <motion.div 
-          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-        >
-          {/* Main Trading Interface */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-foreground">Market</h2>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      placeholder="Search cryptocurrencies..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 w-64 bg-muted/50 border-border/40"
-                    />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold">Available Cryptocurrencies</h2>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                      <Input
+                        placeholder="Search cryptocurrencies..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {cryptosLoading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div key={i} className="flex items-center justify-between p-4 animate-pulse">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-muted rounded-full"></div>
-                          <div>
-                            <div className="h-4 bg-muted rounded w-20 mb-2"></div>
-                            <div className="h-3 bg-muted rounded w-12"></div>
+                  {cryptosLoading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className="animate-pulse">
+                          <div className="h-16 bg-muted rounded-lg"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {cryptosWithHoldings.map((crypto) => (
+                        <div
+                          key={crypto.symbol}
+                          className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <CryptoIcon symbol={crypto.symbol} size={40} />
+                            <div>
+                              <h3 className="font-medium">{crypto.name}</h3>
+                              <p className="text-sm text-muted-foreground">{crypto.symbol}</p>
+                              {crypto.hasHolding && (
+                                <p className="text-xs text-primary">
+                                  Holding: {crypto.holdingAmount.toFixed(6)} {crypto.symbol}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="text-right mr-4">
+                            <div className="font-medium">
+                              ${crypto.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                            </div>
+                            <div className={`text-sm flex items-center justify-end ${crypto.change24h >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {crypto.change24h >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+                              {Math.abs(crypto.change24h).toFixed(2)}%
+                            </div>
+                          </div>
+
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleTrade(crypto, "buy")}
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                            >
+                              Buy
+                            </Button>
+                            {crypto.hasHolding && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleTrade(crypto, "sell")}
+                                className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                              >
+                                Sell
+                              </Button>
+                            )}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="h-4 bg-muted rounded w-16 mb-2"></div>
-                          <div className="h-3 bg-muted rounded w-12"></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
-                    {filteredCryptos.map((crypto) => (
-                      <div
-                        key={crypto.symbol}
-                        className="grid grid-cols-12 items-center gap-3 p-4 rounded-xl hover:bg-muted/30 transition-all duration-300 group cursor-pointer"
-                      >
-                        <div className="col-span-1">
-                          <CryptoIcon 
-                            coinId={crypto.coinGeckoId}
-                            symbol={crypto.symbol}
-                            size="md"
-                            className="ring-2 ring-border/20"
-                          />
-                        </div>
-                        <div className="col-span-4">
-                          <p className="font-semibold text-foreground">{crypto.name}</p>
-                          <p className="text-sm text-muted-foreground">{crypto.symbol}</p>
-                        </div>
-                        <div className="col-span-2 text-right">
-                          <p className="font-semibold text-foreground">
-                            {formatCurrency(crypto.price)}
-                          </p>
-                          <p className={`text-xs font-medium ${
-                            crypto.change24h >= 0 
-                              ? 'text-green-600 dark:text-green-400' 
-                              : 'text-red-600 dark:text-red-400'
-                          }`}>
-                            {crypto.change24h >= 0 ? "+" : ""}{crypto.change24h.toFixed(2)}%
-                          </p>
-                        </div>
-                        <div className="col-span-5 flex items-center justify-end space-x-3">
-                          <Button
-                            size="sm"
-                            className="px-4 py-2 text-xs bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
-                            onClick={() => handleTrade(crypto, "buy")}
-                          >
-                            Buy
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="px-4 py-2 text-xs bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
-                            onClick={() => handleTrade(crypto, "sell")}
-                          >
-                            Sell
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
 
-          {/* Market Overview */}
           <div className="space-y-6">
-            <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Top Gainers</h3>
-                <div className="space-y-4">
-                  {topGainers.slice(0, 5).map((crypto) => (
-                    <div key={crypto.symbol} className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-foreground">{crypto.symbol}</p>
-                        <p className="text-xs text-muted-foreground">{formatCurrency(crypto.price)}</p>
-                      </div>
-                      <p className={`font-medium ${getChangeColor(crypto.change24h)}`}>
-                        +{crypto.change24h.toFixed(2)}%
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-border/20 bg-card/50 backdrop-blur-xl">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Top Losers</h3>
-                <div className="space-y-4">
-                  {topLosers.slice(0, 5).map((crypto) => (
-                    <div key={crypto.symbol} className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-foreground">{crypto.symbol}</p>
-                        <p className="text-xs text-muted-foreground">{formatCurrency(crypto.price)}</p>
-                      </div>
-                      <p className={`font-medium ${getChangeColor(crypto.change24h)}`}>
-                        {crypto.change24h.toFixed(2)}%
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Trading Tips</h3>
+                  <div className="space-y-3 text-sm text-muted-foreground">
+                    <p>• Always do your own research before investing</p>
+                    <p>• Start with small amounts to learn</p>
+                    <p>• Diversify your portfolio</p>
+                    <p>• Keep track of your transactions</p>
+                    <p>• Set stop-loss orders to manage risk</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Trading Modal */}
       <TradingModal
         isOpen={tradingModalOpen}
         onClose={() => setTradingModalOpen(false)}
         crypto={selectedCrypto}
         tradeType={tradeType}
       />
-    </motion.div>
+    </div>
   );
 }

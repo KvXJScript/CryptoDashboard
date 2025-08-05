@@ -1,42 +1,15 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, X, ArrowUp, ArrowDown } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { useWatchlist, useWatchlistMutation } from "@/hooks/usePortfolio";
+import { useCryptoPrices } from "@/hooks/useCryptoPrices";
 import CryptoIcon from "@/components/CryptoIcon";
 import { motion } from "framer-motion";
 
-interface WatchlistItem {
-  id: number;
-  symbol: string;
-  price: number;
-  change24h: number;
-}
-
 export default function Watchlist() {
-  const queryClient = useQueryClient();
-
-  const { data: watchlist, isLoading } = useQuery<WatchlistItem[]>({
-    queryKey: ["/api/watchlist"],
-  });
-
-  const addToWatchlistMutation = useMutation({
-    mutationFn: async (symbol: string) => {
-      await apiRequest("POST", "/api/watchlist", { symbol });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/watchlist"] });
-    },
-  });
-
-  const removeFromWatchlistMutation = useMutation({
-    mutationFn: async (symbol: string) => {
-      await apiRequest("DELETE", `/api/watchlist/${symbol}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/watchlist"] });
-    },
-  });
+  const { data: watchlist, isLoading } = useWatchlist();
+  const { data: cryptoPrices } = useCryptoPrices();
+  const watchlistMutation = useWatchlistMutation();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -51,39 +24,19 @@ export default function Watchlist() {
     return `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`;
   };
 
-  const getCryptoIcon = (symbol: string) => {
-    const icons: Record<string, string> = {
-      MATIC: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=24&h=24",
-      LINK: "https://images.unsplash.com/photo-1639322537228-f710d846310a?ixlib=rb-4.0.3&auto=format&fit=crop&w=24&h=24",
-      AVAX: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=24&h=24",
-    };
-    return icons[symbol] || "https://images.unsplash.com/photo-1605792657660-596af9009e82?ixlib=rb-4.0.3&auto=format&fit=crop&w=24&h=24";
-  };
-
-  const getCryptoName = (symbol: string) => {
-    const names: Record<string, string> = {
-      MATIC: "Polygon",
-      LINK: "Chainlink",
-      AVAX: "Avalanche",
-      BTC: "Bitcoin",
-      ETH: "Ethereum",
-      ADA: "Cardano",
-      SOL: "Solana",
-    };
-    return names[symbol] || symbol;
-  };
-
   const handleAddToWatchlist = () => {
-    // In a real app, this would open a modal to select a crypto to add
-    // For now, we'll add a random one from common cryptos
-    const availableCryptos = ["MATIC", "LINK", "AVAX"];
+    const availableCryptos = ["MATIC", "LINK", "AVAX", "BNB", "XRP", "DOGE"];
     const currentSymbols = watchlist?.map(item => item.symbol) || [];
     const availableToAdd = availableCryptos.filter(symbol => !currentSymbols.includes(symbol));
     
     if (availableToAdd.length > 0) {
       const randomSymbol = availableToAdd[Math.floor(Math.random() * availableToAdd.length)];
-      addToWatchlistMutation.mutate(randomSymbol);
+      watchlistMutation.mutate({ action: "add", symbol: randomSymbol });
     }
+  };
+
+  const handleRemoveFromWatchlist = (symbol: string) => {
+    watchlistMutation.mutate({ action: "remove", symbol });
   };
 
   if (isLoading) {
@@ -100,16 +53,13 @@ export default function Watchlist() {
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center justify-between animate-pulse">
                 <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                  <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
                   <div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1"></div>
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-8"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-12"></div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12 mb-1"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-8"></div>
-                </div>
+                <div className="h-6 w-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
               </div>
             ))}
           </div>
@@ -118,73 +68,67 @@ export default function Watchlist() {
     );
   }
 
+  const watchlistWithPrices = watchlist?.map(item => {
+    const cryptoPrice = cryptoPrices?.find(p => p.symbol === item.symbol);
+    return {
+      ...item,
+      price: cryptoPrice?.price || 0,
+      change24h: cryptoPrice?.change24h || 0,
+    };
+  }) || [];
+
   return (
     <Card>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold">Watchlist</h3>
-          <Button
-            size="icon"
+          <Button 
+            size="icon" 
             variant="ghost"
-            className="text-crypto-primary hover:text-crypto-primary/80"
             onClick={handleAddToWatchlist}
-            disabled={addToWatchlistMutation.isPending}
+            disabled={watchlistMutation.isPending}
           >
             <Plus className="w-4 h-4" />
           </Button>
         </div>
-
-        {!watchlist || watchlist.length === 0 ? (
+        
+        {watchlistWithPrices.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-500">No items in watchlist</p>
-            <p className="text-sm text-gray-400 mt-2">Add cryptocurrencies to track their prices</p>
+            <p className="text-muted-foreground">No cryptocurrencies in watchlist</p>
+            <p className="text-sm text-muted-foreground mt-2">Add some to track their prices</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {watchlist.map((item, index) => (
-              <motion.div 
-                key={item.id} 
-                className="grid grid-cols-12 items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-all duration-200 group"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+          <div className="space-y-4">
+            {watchlistWithPrices.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
+                className="flex items-center justify-between"
               >
-                <div className="col-span-1">
-                  <CryptoIcon 
-                    coinId={item.symbol.toLowerCase()}
-                    symbol={item.symbol}
-                    size="md"
-                    className="ring-2 ring-border/30 shadow-sm"
-                  />
+                <div className="flex items-center space-x-3">
+                  <CryptoIcon symbol={item.symbol} size={32} />
+                  <div>
+                    <p className="font-medium">{item.symbol}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatPrice(item.price)}
+                      <span className={`ml-2 ${item.change24h >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {item.change24h >= 0 ? <ArrowUp className="inline w-3 h-3 mr-1" /> : <ArrowDown className="inline w-3 h-3 mr-1" />}
+                        {formatPercent(item.change24h)}
+                      </span>
+                    </p>
+                  </div>
                 </div>
-                <div className="col-span-6">
-                  <p className="text-sm font-medium text-foreground">{getCryptoName(item.symbol)}</p>
-                  <p className="text-xs text-muted-foreground">{item.symbol}</p>
-                </div>
-                <div className="col-span-3 text-right">
-                  <p className="text-sm font-medium text-foreground">{formatPrice(item.price)}</p>
-                  <p className={`text-xs font-medium ${
-                    item.change24h >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-                  }`}>
-                    {item.change24h >= 0 ? (
-                      <ArrowUp className="w-3 h-3 mr-1 inline" />
-                    ) : (
-                      <ArrowDown className="w-3 h-3 mr-1 inline" />
-                    )}
-                    {formatPercent(item.change24h)}
-                  </p>
-                </div>
-                <div className="col-span-2 flex items-center justify-end">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
-                    onClick={() => removeFromWatchlistMutation.mutate(item.symbol)}
-                    disabled={removeFromWatchlistMutation.isPending}
-                  >
-                    <X className="w-3 h-3" />
-                  </Button>
-                </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => handleRemoveFromWatchlist(item.symbol)}
+                  disabled={watchlistMutation.isPending}
+                  className="text-muted-foreground hover:text-red-600"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </motion.div>
             ))}
           </div>

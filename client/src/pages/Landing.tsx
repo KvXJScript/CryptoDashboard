@@ -601,7 +601,7 @@ export default function Landing() {
                 <span className="text-2xl font-bold text-white">CryptoTracker</span>
               </div>
               <p className="text-white/70 text-lg leading-relaxed max-w-md">
-                The ultimate cryptocurrency portfolio tracking and trading platform. 
+                The ultimate cryptocurrency portfolio tracking and trading platform.
                 Start your journey to financial freedom with simulated trading and real-time analytics.
               </p>
               <div className="flex space-x-4 mt-6">
